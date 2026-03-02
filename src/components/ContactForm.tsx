@@ -1,11 +1,58 @@
 import { useState } from 'react';
 import { COMPANY } from '../constants';
+import { insertLead } from '../utils/supabaseClient';
+import { sendContactEmail } from '../utils/emailNotification';
 
 export const ContactForm = () => {
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        setSubmitting(true);
+        setError(null);
+
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+
+        const firstName = formData.get('first-name') as string;
+        const lastName = formData.get('last-name') as string;
+        const email = formData.get('email') as string;
+        const phone = formData.get('phone') as string;
+        const county = formData.get('county') as string;
+        const situation = formData.get('situation') as string;
+        const notes = formData.get('notes') as string;
+
+        const ownerName = `${firstName} ${lastName}`.trim();
+
+        // Save to Supabase
+        const { success, error: dbError } = await insertLead({
+            owner_name: ownerName,
+            email,
+            phone,
+            county,
+            case_type: situation,
+            notes,
+            source: 'contact_form',
+        });
+
+        if (!success) {
+            console.error('Supabase error:', dbError);
+            // Still try to send email even if DB fails
+        }
+
+        // Send email notification
+        await sendContactEmail({
+            name: ownerName,
+            email,
+            phone,
+            county,
+            situation,
+            notes,
+        });
+
+        setSubmitting(false);
         setSubmitted(true);
     };
 
@@ -33,29 +80,29 @@ export const ContactForm = () => {
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label htmlFor="first-name" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">First Name *</label>
-                                <input id="first-name" type="text" required className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
+                                <input id="first-name" name="first-name" type="text" required className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
                             </div>
                             <div>
                                 <label htmlFor="last-name" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Last Name *</label>
-                                <input id="last-name" type="text" required className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
+                                <input id="last-name" name="last-name" type="text" required className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
                             </div>
                         </div>
                         <div>
                             <label htmlFor="email" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Email *</label>
-                            <input id="email" type="email" required className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
+                            <input id="email" name="email" type="email" required className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
                         </div>
                         <div>
                             <label htmlFor="phone" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Phone</label>
-                            <input id="phone" type="tel" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
+                            <input id="phone" name="phone" type="tel" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
                         </div>
                         <div className="grid md:grid-cols-2 gap-6">
                             <div>
                                 <label htmlFor="county" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Florida County</label>
-                                <input id="county" type="text" placeholder="e.g. Miami-Dade, Pinellas, Orange" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
+                                <input id="county" name="county" type="text" placeholder="e.g. Miami-Dade, Pinellas, Orange" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent" />
                             </div>
                             <div>
                                 <label htmlFor="situation" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Your Situation</label>
-                                <select id="situation" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent bg-white">
+                                <select id="situation" name="situation" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent bg-white">
                                     <option value="">Select one...</option>
                                     <option value="surplus">My property was already sold at auction</option>
                                     <option value="foreclosure">I'm currently facing foreclosure</option>
@@ -67,13 +114,24 @@ export const ContactForm = () => {
                         </div>
                         <div>
                             <label htmlFor="notes" className="block text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2">Anything else we should know?</label>
-                            <textarea id="notes" rows={3} placeholder="Timeline, property address, questions, etc." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent resize-none" />
+                            <textarea id="notes" name="notes" rows={3} placeholder="Timeline, property address, questions, etc." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent resize-none" />
                         </div>
+
+                        {error && (
+                            <div className="text-red-600 text-sm bg-red-50 border border-red-100 rounded-xl px-4 py-3">
+                                {error}
+                            </div>
+                        )}
+
                         <button
                             type="submit"
-                            className="w-full py-4 bg-slate-900 text-white rounded-full font-bold text-sm uppercase tracking-widest hover:bg-slate-700 transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+                            disabled={submitting}
+                            className={`w-full py-4 rounded-full font-bold text-sm uppercase tracking-widest transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 ${submitting
+                                    ? 'bg-slate-400 text-white cursor-wait'
+                                    : 'bg-slate-900 text-white hover:bg-slate-700'
+                                }`}
                         >
-                            Check My Funds — Free
+                            {submitting ? 'Submitting...' : 'Check My Funds — Free'}
                         </button>
                         <p className="text-[10px] text-slate-400 text-center">
                             By submitting, you agree to be contacted about your potential claim. No obligation. No cost. You can also <a href={COMPANY.calendly} target="_blank" rel="noopener noreferrer" className="underline hover:text-slate-600">book a free consultation directly</a>.

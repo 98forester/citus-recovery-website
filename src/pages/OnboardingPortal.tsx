@@ -8,6 +8,7 @@ import { StepDocuments, DocumentFiles } from '../components/portal/StepDocuments
 import { StepReviewSign } from '../components/portal/StepReviewSign';
 import { StepConfirmation } from '../components/portal/StepConfirmation';
 import { sendNotificationEmail, generateReferenceId } from '../utils/emailNotification';
+import { insertLead } from '../utils/supabaseClient';
 import { COMPANY } from '../constants';
 
 const INITIAL_CLIENT_INFO: ClientInfo = {
@@ -53,6 +54,25 @@ export const OnboardingPortal = () => {
         if (documents.w9Form.length > 0) docNames.push('W9 Form');
         documents.additionalDocs.forEach((f) => docNames.push(f.name));
 
+        const mailingAddress = `${clientInfo.streetAddress}, ${clientInfo.city}, ${clientInfo.state} ${clientInfo.zip}`;
+
+        // Save to Supabase
+        await insertLead({
+            owner_name: `${clientInfo.firstName} ${clientInfo.lastName}`,
+            email: clientInfo.email,
+            phone: clientInfo.phone,
+            property_address: clientInfo.propertyAddress,
+            county: clientInfo.county,
+            case_type: clientInfo.caseType,
+            mailing_address: mailingAddress,
+            notes: clientInfo.notes,
+            source: 'portal',
+            documents: docNames,
+            signature_data: signature || undefined,
+            reference_id: refId,
+        });
+
+        // Send email notification
         await sendNotificationEmail({
             clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
             clientEmail: clientInfo.email,
@@ -62,7 +82,7 @@ export const OnboardingPortal = () => {
             caseType: clientInfo.caseType,
             documents: docNames,
             referenceId: refId,
-            mailingAddress: `${clientInfo.streetAddress}, ${clientInfo.city}, ${clientInfo.state} ${clientInfo.zip}`,
+            mailingAddress,
             notes: clientInfo.notes,
         });
 

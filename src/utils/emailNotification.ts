@@ -1,18 +1,17 @@
 import emailjs from '@emailjs/browser';
 
 // ──────────────────────────────────────────────
-// EmailJS Configuration
-// To enable email notifications:
-// 1. Sign up at https://www.emailjs.com/ (free: 200 emails/month)
-// 2. Create an email service (e.g. Gmail, Outlook)
-// 3. Create an email template with variables: {{client_name}}, {{client_email}}, {{client_phone}}, {{property_address}}, {{county}}, {{case_type}}, {{documents}}, {{reference_id}}, {{submission_date}}
-// 4. Replace the values below with your actual IDs
+// EmailJS Configuration — reads from environment variables
+// Set these in .env (prefixed with VITE_ for Vite):
+//   VITE_EMAILJS_SERVICE_ID
+//   VITE_EMAILJS_TEMPLATE_ID
+//   VITE_EMAILJS_PUBLIC_KEY
 // ──────────────────────────────────────────────
 
 const EMAILJS_CONFIG = {
-    serviceId: 'YOUR_SERVICE_ID',    // Replace with your EmailJS service ID
-    templateId: 'YOUR_TEMPLATE_ID',  // Replace with your EmailJS template ID
-    publicKey: 'YOUR_PUBLIC_KEY',     // Replace with your EmailJS public key
+    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
+    templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
+    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '',
 };
 
 interface NotificationData {
@@ -55,26 +54,9 @@ export const sendNotificationEmail = async (data: NotificationData): Promise<boo
         }),
     };
 
-    // Check if EmailJS is configured
-    if (EMAILJS_CONFIG.serviceId === 'YOUR_SERVICE_ID') {
-        console.log('──────────────────────────────────────');
-        console.log('📧 NEW CLIENT ONBOARDING SUBMISSION');
-        console.log('──────────────────────────────────────');
-        console.log('Reference ID:', templateParams.reference_id);
-        console.log('Client:', templateParams.client_name);
-        console.log('Email:', templateParams.client_email);
-        console.log('Phone:', templateParams.client_phone);
-        console.log('Property:', templateParams.property_address);
-        console.log('County:', templateParams.county);
-        console.log('Case Type:', templateParams.case_type);
-        console.log('Documents:', templateParams.documents);
-        console.log('Mailing Address:', templateParams.mailing_address);
-        console.log('Notes:', templateParams.notes);
-        console.log('Submitted:', templateParams.submission_date);
-        console.log('──────────────────────────────────────');
-        console.log('⚠️  EmailJS not configured. To enable email notifications,');
-        console.log('    update the config in src/utils/emailNotification.ts');
-        console.log('──────────────────────────────────────');
+    if (!EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId || !EMAILJS_CONFIG.publicKey) {
+        console.warn('⚠️  EmailJS env vars not set — logging submission to console.');
+        console.log('📧 Portal Submission:', templateParams);
         return true;
     }
 
@@ -89,6 +71,53 @@ export const sendNotificationEmail = async (data: NotificationData): Promise<boo
         return true;
     } catch (error) {
         console.error('❌ Failed to send email notification:', error);
+        return false;
+    }
+};
+
+// Simplified email for the landing page contact form
+export const sendContactEmail = async (data: {
+    name: string;
+    email: string;
+    phone: string;
+    county: string;
+    situation: string;
+    notes: string;
+}): Promise<boolean> => {
+    const templateParams = {
+        client_name: data.name,
+        client_email: data.email,
+        client_phone: data.phone || 'Not provided',
+        property_address: 'N/A — lead capture form',
+        county: data.county || 'Not specified',
+        case_type: data.situation || 'Not specified',
+        documents: 'None (contact form)',
+        reference_id: `LEAD-${Date.now().toString(36).toUpperCase()}`,
+        mailing_address: 'Not provided',
+        notes: data.notes || 'None',
+        submission_date: new Date().toLocaleString('en-US', {
+            dateStyle: 'full',
+            timeStyle: 'short',
+        }),
+    };
+
+    if (!EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId || !EMAILJS_CONFIG.publicKey) {
+        console.warn('⚠️  EmailJS env vars not set — logging contact to console.');
+        console.log('📧 Contact Form:', templateParams);
+        return true;
+    }
+
+    try {
+        await emailjs.send(
+            EMAILJS_CONFIG.serviceId,
+            EMAILJS_CONFIG.templateId,
+            templateParams,
+            EMAILJS_CONFIG.publicKey
+        );
+        console.log('✅ Contact email sent');
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to send contact email:', error);
         return false;
     }
 };
