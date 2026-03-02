@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="Citus Recovery Solutions — Florida's premier surplus funds recovery firm. We reclaim your foreclosure equity under Statute 45.032. Free fund audit available." />
+    <title>Citus Recovery Solutions | Premium Florida Surplus Recovery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,700&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* ═══════════════════════════════════════════════════
+   RESET & BASE
+   ═══════════════════════════════════════════════════ */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        html {
+            scroll-behavior: smooth
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: #1e293b;
+            background: #F9F8F6;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: color .2s
+        }
+
+        ul {
+            list-style: none
+        }
+
+        img {
+            max-width: 100%;
+            display: block
+        }
+
+        button {
+            cursor: pointer;
+            font-family: inherit
+        }
+
+        strong {
+            font-weight: 600
+        }
+
+        em {
+            font-style: italic
+        }
+
+        .serif {
+            font-family: 'Playfair Display', Georgia, serif
+        }
+
+        /* ═══════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════ */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 2rem
+        }
+
+        .container-sm {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 0 2rem
+        }
+
+        .container-md {
+            max-width: 1024px;
+            margin: 0 auto;
+            padding: 0 2rem
+        }
+
+        .text-center {
+            text-align: center
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0
+        }
+
+        .tag {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .3em;
+            display: block;
+            margin-bottom: 1rem
+        }
+
+        .tag-slate {
+            color: #94a3b8
+        }
+
+        .tag-emerald {
+            color: #059669
+        }
+
+        .tag-red {
+            color: #dc2626
+        }
+
+        .section-heading {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.25rem;
+            font-style: italic;
+            margin-bottom: 1.5rem
+        }
+
+        .section-sub {
+            color: #64748b;
+            max-width: 640px;
+            margin: 0 auto 4rem;
+            font-size: .95rem
+        }
+
+        /* ═══════════════════════════════════════════════════
+   HEADER
+   ═══════════════════════════════════════════════════ */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(249, 248, 246, .8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, .05)
+        }
+
+        .header-logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            font-style: italic;
+            letter-spacing: -.05em
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 2rem;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            font-weight: 700;
+            color: #94a3b8
+        }
+
+        .header-nav a:hover {
+            color: #1e293b
+        }
+
+        .header-nav .scam-link:hover {
+            color: #dc2626
+        }
+
+        .header-cta {
+            display: inline-block;
+            padding: .75rem 1.5rem;
+            background: #1e293b;
+            color: #fff;
+            border-radius: 9999px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            transition: background .2s
+        }
+
+        .header-cta:hover {
+            background: #475569;
+            color: #fff
+        }
+
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: none;
+            padding: .5rem;
+            flex-direction: column;
+            gap: 3px
+        }
+
+        .mobile-toggle span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: #1e293b
+        }
+
+        .mobile-toggle span:last-child {
+            width: 12px
+        }
+
+        .mobile-nav {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(249, 248, 246, .95);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            flex-direction: column;
+            gap: 1.5rem;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            font-weight: 700;
+            color: #94a3b8;
+            border-bottom: 1px solid rgba(0, 0, 0, .05)
+        }
+
+        .mobile-nav.open {
+            display: flex
+        }
+
+        .mobile-nav a:hover {
+            color: #1e293b
+        }
+
+        .mobile-nav .mobile-cta {
+            padding: .75rem 1.5rem;
+            background: #1e293b;
+            color: #fff;
+            border-radius: 9999px;
+            text-align: center;
+            transition: background .2s
+        }
+
+        .mobile-nav .mobile-phone {
+            color: #059669;
+            text-align: center
+        }
+
+        @media(max-width:1023px) {
+
+            .header-nav,
+            .header-cta-wrap {
+                display: none
+            }
+
+            .mobile-toggle {
+                display: flex
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════════════════ */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 1.5rem 4rem;
+            background: #F9F8F6
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: .375rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            font-weight: 700;
+            color: #94a3b8;
+            margin-bottom: 2rem
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 7rem);
+            line-height: .9;
+            letter-spacing: -.04em;
+            color: #1e293b;
+            margin-bottom: 2rem
+        }
+
+        .hero h1 span {
+            font-style: italic;
+            font-weight: 300;
+            color: #94a3b8
+        }
+
+        .hero-body {
+            max-width: 640px;
+            margin: 0 auto;
+            color: #64748b;
+            font-size: 1.125rem;
+            font-weight: 300;
+            margin-bottom: 1rem
+        }
+
+        .hero-body strong {
+            color: #334155;
+            font-weight: 500
+        }
+
+        .hero-sub {
+            max-width: 640px;
+            margin: 0 auto;
+            color: #94a3b8;
+            font-size: .95rem;
+            font-weight: 300;
+            margin-bottom: 1rem
+        }
+
+        .hero-fine {
+            max-width: 520px;
+            margin: 0 auto;
+            font-size: .875rem;
+            color: #94a3b8;
+            margin-bottom: 3rem
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem
+        }
+
+        .btn-primary {
+            display: inline-block;
+            padding: 1.25rem 3rem;
+            background: #1e293b;
+            color: #fff;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: .875rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .25);
+            transition: transform .2s;
+            border: none
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            color: #fff
+        }
+
+        .hero-phone {
+            font-size: .875rem;
+            font-weight: 700;
+            color: #475569
+        }
+
+        .hero-phone:hover {
+            color: #1e293b
+        }
+
+        .hero-phone span {
+            text-decoration: underline
+        }
+
+        .trust-strip {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase
+        }
+
+        .trust-strip .emerald {
+            color: #059669
+        }
+
+        .trust-strip .slate {
+            color: #94a3b8
+        }
+
+        @media(min-width:768px) {
+            .hero-actions {
+                flex-direction: row;
+                justify-content: center
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+   TRUST BADGES
+   ═══════════════════════════════════════════════════ */
+        .trust-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 3rem;
+            padding: 3rem 2rem;
+            border-top: 1px solid rgba(0, 0, 0, .05);
+            border-bottom: 1px solid rgba(0, 0, 0, .05)
+        }
+
+        .trust-badges span {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .3em;
+            font-weight: 700;
+            color: #94a3b8
+        }
+
+        /* ═══════════════════════════════════════════════════
+   STATS STRIP
+   ═══════════════════════════════════════════════════ */
+        .stats {
+            padding: 4rem 2rem;
+            background: #1e293b;
+            color: #fff
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            text-align: center;
+            max-width: 1280px;
+            margin: 0 auto
+        }
+
+        .stats-grid .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            font-style: italic;
+            font-weight: 700;
+            margin-bottom: .5rem
+        }
+
+        .stats-grid .stat-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .25em;
+            font-weight: 700;
+            color: #94a3b8
+        }
+
+        @media(min-width:768px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr)
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════
+   SERVICES / SURPLUS TYPES
+   ═══════════════════════════════════════════════════ */
+        .services {
+            padding: 8rem 2rem;
+            background: #fff;
+            border-top: 1px solid rgba(0, 0, 0, .05);
+            border-bottom: 1px solid rgba(0, 0, 0, .05)
+        }
+
+        .services-grid {
+            display: grid;
+            gap: 2rem;
+            max-width: 1280px;
+            margin: 0 auto
+        }
+
+        @media(min-width:768px) {
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media(min-width:1024px) {
+            .services-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+        }
+
+        .service-card {
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid #f1f5f9;
+            background: #F9F8F6;
+            transition: box-shadow .3s
+        }
+
+        .service-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, .08)
+        }
+
+        .service-card h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            font-style: italic;
+            margin-bottom: 1rem
+        }
+
+        .service-card p {
+            color: #64748b;
+            font-size: .875rem;
+            line-height: 1.7;
+            margin-bottom: 1rem
+        }
+
+        .service-card .statute {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .15em
+        }
+
+        .statute-law {
+            color: #059669
+        }
+
+        .statute-creative {
+            color: #2563eb
+        }
+
+        /* ═══════════════════════════════════════════════════
+   LEGAL SECTION
+   ═══════════════════════════════════════════════════ */
+        .legal {
+            padding: 8rem 2rem;
+            border-top: 1px solid rgba(0, 0, 0, .05);
+            border-bottom: 1px solid rgba(0, 0, 0, .05)
+        }
+
+        .legal-body {
+            color: #64748b;
+            line-height: 1.8
+        }
+
+        .legal-body p {
+            margin-bottom: 1.5rem
+        }
+
+        .legal-body strong {
+            color: #334155
+        }
+
+        .legal-body .emerald {
+            color: #059669
+        }
+
+        .legal-body .fine {
+            font-size: .875rem;
+            color: #94a3b8;
+            font-style: italic
+        }
+
+        /* ═══════════════════════════════════════════════════
+   SCAM WARNING
+   ═══════════════════════════════════════════════════ */
+        .scam {
+            padding: 6rem 2rem;
+            background: #fef2f2;
+            border-bottom: 1px solid #fecaca
+        }
+
+        .scam-body {
+            font-size: .875rem;
+            color: #475569;
+            line-height: 1.8
+        }
+
+        .scam-body p {
+            margin-bottom: 1rem
+        }
+
+        .scam-body ul {
+            padding-left: 1.25rem;
+            margin: 1rem 0
+        }
+
+        .scam-body li {
+            margin-bottom: .5rem;
+            list-style: disc
+        }
+
+        .scam-body li strong {
+            color: #334155
+        }
+
+        .scam-body .red {
+            color: #b91c1c
+        }
+
+        .scam-body .emerald {
+            color: #047857
+        }
+
+        .scam-cta {
+            margin-top: 1.5rem;
+            font-weight: 500;
+            color: #334155
+        }
+
+        /* ═══════════════════════════════════════════════════
+   PROCESS STEPS
+   ═══════════════════════════════════════════════════ */
+        .process {
+            padding: 8rem 2rem
+        }
+
+        .process-grid {
+            display: grid;
+            gap: 4rem;
+            max-width: 1280px;
+            margin: 0 auto
+        }
+
+        @media(min-width:768px) {
+            .process-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+        }
+
+        .step-number {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.75rem;
+            font-style: italic;
+            color: #e2e8f0;
+            margin-bottom: 1.5rem;
+            transition: color .3s
+        }
+
+        .step:hover .step-number {
+            color: #1e293b
+        }
+
+        .step h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            font-style: italic;
+            margin-bottom: 1rem
+        }
+
+        .step p {
+            color: #64748b;
+            font-size: .875rem;
+            line-height: 1.7
+        }
+
+        /* ═══════════════════════════════════════════════════
+   WHY CHOOSE
+   ═══════════════════════════════════════════════════ */
+        .why {
+            padding: 8rem 2rem
+        }
+
+        .why-grid {
+            display: grid;
+            gap: 4rem;
+            max-width: 1024px;
+            margin: 0 auto
+        }
+
+        @media(min-width:768px) {
+            .why-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        .why-card h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem
+        }
+
+        .why-card p {
+            color: #64748b;
+            font-size: .875rem;
+            line-height: 1.7
+        }
+
+        /* ═══════════════════════════════════════════════════
+   TESTIMONIALS
+   ═══════════════════════════════════════════════════ */
+        .testimonials {
+            padding: 8rem 2rem;
+            background: #F9F8F6
+        }
+
+        .testimonials-grid {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 1280px;
+            margin: 0 auto
+        }
+
+        @media(min-width:768px) {
+            .testimonials-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media(min-width:1024px) {
+            .testimonials-grid {
+                grid-template-columns: repeat(3, 1fr)
+            }
+        }
+
+        .testimonial-card {
+            padding: 2.5rem;
+            border-radius: 2.5rem;
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .05)
+        }
+
+        .testimonial-card.highlight {
+            background: #1e293b;
+            color: #fff;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .25)
+        }
+
+        .testimonial-amount {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #059669
+        }
+
+        .highlight .testimonial-amount {
+            color: #34d399
+        }
+
+        .testimonial-text {
+            font-size: .875rem;
+            font-style: italic;
+            line-height: 1.7;
+            opacity: .9;
+            margin-bottom: 2rem
+        }
+
+        .testimonial-name {
+            font-weight: 700;
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .15em
+        }
+
+        .testimonial-loc {
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: .25rem
+        }
+
+        /* ═══════════════════════════════════════════════════
+   FAQ
+   ═══════════════════════════════════════════════════ */
+        .faq {
+            padding: 8rem 2rem;
+            background: #fff;
+            border-top: 1px solid rgba(0, 0, 0, .05)
+        }
+
+        .faq-list {
+            max-width: 768px;
+            margin: 0 auto
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #f1f5f9
+        }
+
+        .faq-question {
+            width: 100%;
+            background: none;
+            border: none;
+            text-align: left;
+            padding: 1.25rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .875rem;
+            font-weight: 700;
+            color: #1e293b;
+            cursor: pointer;
+            gap: 2rem;
+            transition: color .2s
+        }
+
+        .faq-question:hover {
+            color: #475569
+        }
+
+        .faq-icon {
+            font-size: 1.25rem;
+            color: #cbd5e1;
+            flex-shrink: 0;
+            transition: transform .2s
+        }
+
+        .faq-item.open .faq-icon {
+            transform: rotate(45deg)
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 0 1.25rem;
+            color: #64748b;
+            font-size: .875rem;
+            line-height: 1.7
+        }
+
+        .faq-item.open .faq-answer {
+            display: block
+        }
+
+        /* ═══════════════════════════════════════════════════
+   CONTACT FORM
+   ═══════════════════════════════════════════════════ */
+        .contact {
+            padding: 8rem 2rem;
+            background: #F9F8F6
+        }
+
+        .contact-form {
+            background: #fff;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .05);
+            border: 1px solid #f1f5f9;
+            max-width: 640px;
+            margin: 0 auto
+        }
+
+        .form-row {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem
+        }
+
+        @media(min-width:768px) {
+            .form-row-2 {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem
+        }
+
+        .form-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            color: #94a3b8;
+            margin-bottom: .5rem
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: .75rem 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: .75rem;
+            font-size: .875rem;
+            font-family: inherit;
+            transition: border-color .2s, box-shadow .2s;
+            outline: none;
+            background: #fff;
+            color: #1e293b
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            border-color: #1e293b;
+            box-shadow: 0 0 0 2px rgba(30, 41, 59, .15)
+        }
+
+        .form-textarea {
+            resize: none
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 1rem;
+            background: #1e293b;
+            color: #fff;
+            border: none;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: .875rem;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            transition: background .2s;
+            cursor: pointer
+        }
+
+        .form-submit:hover {
+            background: #475569
+        }
+
+        .form-fine {
+            text-align: center;
+            font-size: 10px;
+            color: #94a3b8;
+            margin-top: 1rem
+        }
+
+        .form-fine a {
+            text-decoration: underline
+        }
+
+        .form-fine a:hover {
+            color: #475569
+        }
+
+        .contact-phone {
+            text-align: center;
+            margin-top: 3rem
+        }
+
+        .contact-phone p {
+            font-size: .875rem;
+            color: #64748b;
+            margin-bottom: .5rem
+        }
+
+        .contact-phone a.phone-number {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+            transition: color .2s
+        }
+
+        .contact-phone a.phone-number:hover {
+            color: #059669
+        }
+
+        .contact-phone .espanol {
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            font-weight: 700;
+            margin-top: .25rem
+        }
+
+        .contact-phone .email-link {
+            font-size: .75rem;
+            color: #94a3b8;
+            display: block;
+            margin-top: .5rem
+        }
+
+        .contact-phone .email-link:hover {
+            color: #475569
+        }
+
+        /* ═══════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════ */
+        .footer {
+            padding: 5rem 2rem;
+            border-top: 1px solid #f1f5f9;
+            background: #fff
+        }
+
+        .footer-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 3rem
+        }
+
+        @media(min-width:768px) {
+            .footer-inner {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start
+            }
+        }
+
+        .footer-brand .footer-logo {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.5rem;
+            font-weight: 700
+        }
+
+        .footer-brand .footer-sub {
+            font-size: 10px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            margin-top: .5rem
+        }
+
+        .footer-brand .footer-address {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: .75rem;
+            line-height: 1.6
+        }
+
+        .footer-brand .footer-phone {
+            font-size: 11px;
+            font-weight: 700;
+            color: #475569;
+            letter-spacing: .05em;
+            margin-top: .5rem;
+            display: block
+        }
+
+        .footer-brand .footer-phone:hover {
+            color: #1e293b
+        }
+
+        .footer-brand .footer-email {
+            font-size: 11px;
+            color: #94a3b8;
+            display: block;
+            margin-top: .25rem
+        }
+
+        .footer-brand .footer-email:hover {
+            color: #475569
+        }
+
+        .footer-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            font-weight: 700;
+            color: #94a3b8
+        }
+
+        @media(min-width:768px) {
+            .footer-nav {
+                flex-direction: row;
+                gap: 2rem
+            }
+        }
+
+        .footer-nav a:hover {
+            color: #1e293b
+        }
+
+        .footer-right {
+            text-align: left
+        }
+
+        @media(min-width:768px) {
+            .footer-right {
+                text-align: right
+            }
+        }
+
+        .footer-right .espanol {
+            color: #059669;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .15em;
+            margin-bottom: .5rem
+        }
+
+        .footer-right .copyright {
+            font-size: 10px;
+            color: #cbd5e1
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════
+     HEADER
+     ═══════════════════════════════════════════════════ -->
+    <header class="header">
+        <a href="/" class="header-logo">Citus</a>
+        <nav class="header-nav">
+            <a href="#surplus-types">Services</a>
+            <a href="#process">Process</a>
+            <a href="#why-citus">Why Citus</a>
+            <a href="#scams" class="scam-link">Scam Alert</a>
+            <a href="#testimonials">Reviews</a>
+            <a href="#faq">FAQ</a>
+        </nav>
+        <span class="header-cta-wrap"><a href="#audit" class="header-cta">Free Fund Search</a></span>
+        <button class="mobile-toggle" onclick="document.getElementById('mobileNav').classList.toggle('open')"
+            aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </button>
+        <nav id="mobileNav" class="mobile-nav">
+            <a href="#surplus-types">Services</a>
+            <a href="#process">Process</a>
+            <a href="#why-citus">Why Citus</a>
+            <a href="#scams">Scam Alert</a>
+            <a href="#testimonials">Reviews</a>
+            <a href="#faq">FAQ</a>
+            <a href="#audit" class="mobile-cta">Free Fund Search</a>
+            <a href="tel:+14074798310" class="mobile-phone">(407) 479-8310</a>
+        </nav>
+    </header>
+
+    <!-- ═══════════════════════════════════════════════════
+     HERO
+     ═══════════════════════════════════════════════════ -->
+    <section class="hero">
+        <div class="hero-badge">St. Petersburg, FL — Serving All 67 Counties</div>
+        <h1 class="serif">Your home was sold.<br><span>The extra money is yours.</span></h1>
+        <p class="hero-body">When a Florida foreclosure auction sells your property for more than you owed, the surplus
+            belongs to <strong>you</strong> — not the bank, not the county, not the recovery company that sent you a
+            letter.</p>
+        <p class="hero-sub">We've helped families across Florida recover tens of thousands of dollars they didn't know
+            they were owed. And if you're still in foreclosure, we may be able to help you <strong>keep your
+                home</strong> through creative finance solutions.</p>
+        <p class="hero-fine">No upfront cost. No obligation. Free consultation. We only get paid when you do.</p>
+        <div class="hero-actions">
+            <a href="https://calendly.com/citusrecoverysolutions/30min" target="_blank" rel="noopener noreferrer"
+                class="btn-primary">Schedule Free Consultation</a>
+            <a href="tel:+14074798310" class="hero-phone">or call <span>(407) 479-8310</span></a>
+        </div>
+        <div class="trust-strip">
+            <span class="emerald">✓ No Upfront Fees</span>
+            <span class="slate">✓ Competitive Rates</span>
+            <span class="slate">✓ 100% Virtual Process</span>
+            <span class="slate">✓ Hablamos Español</span>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     TRUST BADGES
+     ═══════════════════════════════════════════════════ -->
+    <div class="trust-badges">
+        <span>The Florida Bar</span>
+        <span>Google 5.0 Rating</span>
+        <span>AVVO 10.0 Rated</span>
+        <span>BBB Accredited A+</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+     STATS STRIP
+     ═══════════════════════════════════════════════════ -->
+    <section class="stats">
+        <div class="stats-grid">
+            <div>
+                <div class="stat-value">67</div>
+                <div class="stat-label">Florida Counties Covered</div>
+            </div>
+            <div>
+                <div class="stat-value">$0</div>
+                <div class="stat-label">Upfront Cost to You</div>
+            </div>
+            <div>
+                <div class="stat-value">30–60</div>
+                <div class="stat-label">Days Average Turnaround</div>
+            </div>
+            <div>
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Virtual — No Travel Needed</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     SERVICES / SURPLUS TYPES
+     ═══════════════════════════════════════════════════ -->
+    <section id="surplus-types" class="services">
+        <div class="text-center">
+            <span class="tag tag-slate">What We Do</span>
+            <h2 class="section-heading serif">Recovery, Prevention &amp; Everything In Between</h2>
+            <p class="section-sub">Whether your home was already sold at auction, you're facing foreclosure right now,
+                or you're an heir to a property you didn't even know had money attached to it — we have a path forward
+                for you.</p>
+        </div>
+        <div class="services-grid">
+            <div class="service-card">
+                <h3>Mortgage Foreclosure Surplus</h3>
+                <p>When your home sells at a mortgage foreclosure auction for more than the outstanding loan balance,
+                    the excess belongs to you — not the bank, not the servicer, not the county. We file the legal claim
+                    and fight any competing liens so you get what's rightfully yours.</p>
+                <span class="statute statute-law">FL Statute 45.032</span>
+            </div>
+            <div class="service-card">
+                <h3>Tax Deed Sale Surplus</h3>
+                <p>If your property was sold at a tax deed sale for more than the delinquent taxes owed, you may be
+                    entitled to the overage. These cases have shorter filing deadlines and stricter procedural
+                    requirements — but we've handled hundreds of them across all 67 counties.</p>
+                <span class="statute statute-law">FL Statute 197.582</span>
+            </div>
+            <div class="service-card">
+                <h3>HOA &amp; COA Foreclosure Surplus</h3>
+                <p>Homeowner and condo associations can foreclose for unpaid assessments — sometimes just a few thousand
+                    dollars — while your property sells for far more. The difference is legally yours. We handle the
+                    claim and challenge the association's lien position when necessary.</p>
+                <span class="statute statute-law">FL Statute 45.032</span>
+            </div>
+            <div class="service-card">
+                <h3>Heir &amp; Probate Surplus Claims</h3>
+                <p>If a deceased family member's property was sold in foreclosure, the heirs may be entitled to surplus
+                    funds. These cases often require probate coordination, death certificates, and affidavits. We handle
+                    all of it — even if multiple heirs are involved across different states.</p>
+                <span class="statute statute-law">FL Statute 45.032(1)(b)</span>
+            </div>
+            <div class="service-card">
+                <h3>Foreclosure Prevention &amp; Creative Solutions</h3>
+                <p>If you haven't lost your home yet, it may not be too late. We use creative finance strategies —
+                    including subject-to agreements, seller financing, and deed-in-lieu negotiations — to help
+                    homeowners avoid foreclosure entirely and retain equity. Even if we can't do business together,
+                    we'll point you in the right direction.</p>
+                <span class="statute statute-creative">Creative Finance</span>
+            </div>
+            <div class="service-card">
+                <h3>Government &amp; Code Enforcement Lien Disputes</h3>
+                <p>Government agencies, code enforcement boards, and utility companies often file competing claims
+                    against surplus funds. We litigate these disputes in court, challenging inflated lien amounts and
+                    improper claims to maximize your recovery.</p>
+                <span class="statute statute-law">FL Statute 45.032</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     LEGAL SECTION
+     ═══════════════════════════════════════════════════ -->
+    <section id="legal" class="legal">
+        <div class="container-md text-center">
+            <span class="tag tag-slate">Your Legal Right</span>
+            <h2 class="section-heading serif">The Law Is on Your Side</h2>
+        </div>
+        <div class="container-md legal-body">
+            <p>Florida law doesn't leave surplus funds to chance. Under <strong>Statute 45.032</strong>, there is a
+                <em>rebuttable legal presumption</em> that the owner of record on the date the <em>lis pendens</em> was
+                filed is entitled to surplus proceeds — after payment of any subordinate lienholders. In plain English:
+                <strong>the money is presumed to be yours</strong> unless someone proves otherwise.</p>
+            <p>This presumption applies to mortgage foreclosures. For tax deed sales, <strong>Statute 197.582</strong>
+                governs the surplus distribution with different timelines and requirements — which is why having
+                experienced representation matters.</p>
+            <p>And here's what the unsolicited letters won't tell you: under <strong>FS 45.033</strong>, non-attorney
+                surplus recovery services are legally capped at <strong class="emerald">12%</strong> of the recovered
+                amount. Many companies violate this cap by having you sign an "Assignment of Rights" — which transfers
+                your legal claim to them entirely. <strong>Never sign an Assignment of Rights without legal
+                    counsel.</strong></p>
+            <p class="fine">Our team works with licensed attorneys who provide full legal representation under Florida
+                Bar guidelines — not just a form letter and a prayer.</p>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     SCAM WARNING
+     ═══════════════════════════════════════════════════ -->
+    <section id="scams" class="scam">
+        <div class="container-sm">
+            <div class="text-center">
+                <span class="tag tag-red">⚠ Consumer Alert</span>
+                <h3 class="section-heading serif" style="font-size:1.5rem">Received a Letter About Surplus Funds? Read
+                    This First.</h3>
+            </div>
+            <div class="scam-body">
+                <p>After a foreclosure sale, it's common to receive letters from companies offering to recover your
+                    surplus funds. <strong class="red">Be very careful before signing anything.</strong> Here's what you
+                    need to know:</p>
+                <ul>
+                    <li><strong>Most are unlicensed "recovery companies"</strong> — they cannot represent you in court,
+                        cannot fight competing liens, and cannot protect your interests if your claim is contested.</li>
+                    <li><strong>Many charge 30–40% of your funds</strong> through a document called an "Assignment of
+                        Rights" — which transfers your legal claim to them.</li>
+                    <li><strong>Florida Statute 45.033 caps non-attorney recovery services at 12%</strong> — but many
+                        companies circumvent this cap through deceptive contracts.</li>
+                    <li><strong>Once you sign an Assignment of Rights, it's extremely difficult to undo</strong> — even
+                        if you later find a better option.</li>
+                </ul>
+                <p class="scam-cta">If you've already received a letter, don't panic — and don't sign. Call us at
+                    <strong>(407) 479-8310</strong> for a free, no-obligation review of your situation. We'll tell you
+                    honestly whether we can help, how much you're likely owed, and what your best path forward is.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     PROCESS
+     ═══════════════════════════════════════════════════ -->
+    <section id="process" class="process">
+        <div class="text-center">
+            <h2 class="section-heading serif">The Path to Recovery</h2>
+        </div>
+        <div class="process-grid">
+            <div class="step">
+                <div class="step-number">01</div>
+                <h3>Free Consultation &amp; Fund Search</h3>
+                <p>We start with a no-cost, no-obligation conversation about your situation. Whether you lost your home
+                    to foreclosure or you're facing one right now, we'll search the Clerk of Courts across all 67
+                    Florida counties to find out exactly what you're owed or explore creative options to help you keep
+                    your home.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">02</div>
+                <h3>Virtual Onboarding</h3>
+                <p>Once we confirm your funds or develop your strategy, you sign a simple agreement form from your phone
+                    via e-Notary. No office visits. No complicated paperwork. Our team handles all court filings, lien
+                    negotiations, attorney coordination, and hearing appearances on your behalf.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">03</div>
+                <h3>Resolution &amp; Recovery</h3>
+                <p>For surplus claims, your check is mailed directly to your door — most cases resolve in 30 to 60 days.
+                    For foreclosure prevention, we work to stop the process using creative finance strategies. Either
+                    way, you only pay if we deliver results.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     WHY CHOOSE CITUS
+     ═══════════════════════════════════════════════════ -->
+    <section id="why-citus" class="why">
+        <div class="text-center">
+            <span class="tag tag-slate">The Citus Difference</span>
+            <h2 class="section-heading serif">We're Not a "Recovery Company." We're Your Partner.</h2>
+            <p class="section-sub">Most firms in this space send mass mailers and try to lock you into overpriced
+                agreements. We take a different approach — because our goal is to help you, even if we can't do business
+                together.</p>
+        </div>
+        <div class="why-grid">
+            <div class="why-card">
+                <h3>We Work With Licensed Attorneys</h3>
+                <p>Unlicensed recovery companies can only file paperwork. When a bank, HOA, code enforcement board, or
+                    government agency contests your claim, they can't represent you. We collaborate with skilled
+                    attorneys who fight for you in court — and that's the difference between getting your money and
+                    losing it to someone else's competing claim.</p>
+            </div>
+            <div class="why-card">
+                <h3>Competitive, Fair Pricing — Always</h3>
+                <p>We believe our clients should keep as much of their money as possible. Our contingency fee is
+                    negotiated case by case based on the complexity and amount involved — and we'll always work to beat
+                    any competitor's offer. You'll know exactly what you're paying before you sign anything. No hidden
+                    fees, ever.</p>
+            </div>
+            <div class="why-card">
+                <h3>More Than Surplus Funds</h3>
+                <p>Unlike most firms in this space, we don't just recover surplus funds. If you're currently facing
+                    foreclosure, we explore creative finance strategies — like subject-to agreements and seller
+                    financing — that could help you keep your home. Our mission is your financial recovery, whatever
+                    form that takes.</p>
+            </div>
+            <div class="why-card">
+                <h3>We Help People — Period</h3>
+                <p>Not every case is a fit for our services. When it isn't, we don't just hang up — we connect you with
+                    the right resources, explain your options, and make sure you're protected. We'd rather lose a deal
+                    than let someone fall through the cracks.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     TESTIMONIALS
+     ═══════════════════════════════════════════════════ -->
+    <section id="testimonials" class="testimonials">
+        <div class="text-center">
+            <span class="tag tag-slate">Real Clients. Real Recoveries.</span>
+            <h2 class="section-heading serif">Hear From Families We've Helped</h2>
+        </div>
+        <div class="testimonials-grid">
+            <!-- Mary M. — Highlight -->
+            <div class="testimonial-card highlight">
+                <div class="testimonial-amount">$47,000</div>
+                <p class="testimonial-text">"Citus Recovery Solutions helped me reclaim surplus funds from the
+                    foreclosure after I lost my husband and our home. Thanks to them, I regained stability and a fresh
+                    start. Their compassion and dedication truly made a difference when I needed it most."</p>
+                <p class="testimonial-name">Mary M.</p>
+                <p class="testimonial-loc">Miami, Florida</p>
+            </div>
+            <!-- Gomez Family -->
+            <div class="testimonial-card">
+                <div class="testimonial-amount">$38,200</div>
+                <p class="testimonial-text">"When we found out that we couldn't keep the property we inherited, we were
+                    devastated. Citus Recovery Solutions stepped in and helped us file our surplus claim. Their
+                    expertise and dedication made the process seamless. Thanks to Citus, we were able to move forward
+                    with financial stability."</p>
+                <p class="testimonial-name">The Gomez Family</p>
+                <p class="testimonial-loc">Lakeland, Florida</p>
+            </div>
+            <!-- Robert & Linda -->
+            <div class="testimonial-card">
+                <div class="testimonial-amount">$92,000</div>
+                <p class="testimonial-text">"The bank told us there was nothing left. We had given up. A friend
+                    recommended Citus, and within 48 hours they confirmed we had surplus funds we never knew existed.
+                    They handled everything — the court filings, the lien disputes, all of it. We never stepped foot in
+                    a courtroom."</p>
+                <p class="testimonial-name">Robert &amp; Linda P.</p>
+                <p class="testimonial-loc">Palm Beach County</p>
+            </div>
+            <!-- James L. -->
+            <div class="testimonial-card">
+                <div class="testimonial-amount">$67,500</div>
+                <p class="testimonial-text">"I was hours from the filing deadline. Other firms wouldn't even take my
+                    call because of the timeline. Citus went to work immediately — filed the motion that same night.
+                    They fought a second lienholder all the way to a hearing and won."</p>
+                <p class="testimonial-name">James L.</p>
+                <p class="testimonial-loc">Miami-Dade County</p>
+            </div>
+            <!-- Elena G. -->
+            <div class="testimonial-card">
+                <div class="testimonial-amount">$29,800</div>
+                <p class="testimonial-text">"Me explicaron todo en español desde el primer momento. No pagué nada por
+                    adelantado. El proceso fue completamente virtual — firmé todo desde mi teléfono. Recibí mi cheque en
+                    45 días. No confíen en compañías que cobran 30 o 40 por ciento."</p>
+                <p class="testimonial-name">Elena G.</p>
+                <p class="testimonial-loc">Hillsborough County</p>
+            </div>
+            <!-- David S. -->
+            <div class="testimonial-card">
+                <div class="testimonial-amount">$44,000</div>
+                <p class="testimonial-text">"Three different companies sent me letters asking me to sign away my rights
+                    for 40% of my money. Citus explained exactly what those 'Assignment of Rights' agreements really
+                    meant, took my case, and recovered every dollar I was owed."</p>
+                <p class="testimonial-name">David S.</p>
+                <p class="testimonial-loc">Orange County</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     FAQ
+     ═══════════════════════════════════════════════════ -->
+    <section id="faq" class="faq">
+        <div class="text-center">
+            <span class="tag tag-slate">Common Questions</span>
+            <h2 class="section-heading serif">Surplus Funds FAQ</h2>
+        </div>
+        <div class="faq-list">
+            <div class="faq-item open">
+                <button class="faq-question" onclick="toggleFaq(this)">What are surplus funds?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">Surplus funds are the money left over when a foreclosed property is sold at
+                    auction for more than what was owed on the mortgage, taxes, or liens. That extra money doesn't go to
+                    the bank or the county — it belongs to you, the former owner of the property. In Florida, this right
+                    is protected under Statute 45.032.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">How do surplus funds occur?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">Surplus funds are created when a foreclosed property is sold at auction and the
+                    sale price exceeds the total amount owed to the lender — including the remaining mortgage balance,
+                    accrued interest, and foreclosure-related expenses. The excess is held by the Clerk of Courts until
+                    the rightful owner files a legal claim.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">How do I know if I have surplus funds?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">Many people don't even know they're owed money. We conduct a thorough
+                    investigation across all 67 Florida county court records to determine if surplus funds exist in your
+                    name. This search is completely free and comes with zero obligation. If funds exist, we'll tell you
+                    exactly how much before you commit to anything.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">Who is eligible to claim surplus funds?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">The previous owner whose property was foreclosed upon is typically the primary
+                    claimant. However, other parties — including junior lienholders, judgment creditors, and in the case
+                    of a deceased owner, their legal heirs — may also have eligible claims. We help determine your
+                    standing and fight competing claims.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">How much does it cost to hire Citus Recovery
+                    Solutions?<span class="faq-icon">+</span></button>
+                <div class="faq-answer">We work on a contingency fee basis — there are no upfront costs, no retainers,
+                    and no out-of-pocket expenses. Our fee is a percentage of the surplus funds recovered, and it's
+                    negotiated on a case-by-case basis depending on the complexity and amount involved. If we don't
+                    recover your funds, you don't owe us a cent. We'll always work to beat any competitor's pricing.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">How long does the process take?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">The typical timeline is 30 to 60 days from the date your claim is filed.
+                    However, more complex cases — especially those involving competing liens, probate, or multiple
+                    claimants — may take longer. We'll give you a realistic timeline upfront and keep you informed at
+                    every step.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">Can I file the claim myself?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">You can try, but the legal process is complex and unforgiving. You must file a
+                    formal motion with the court, serve notice to all interested parties (including the lender, any
+                    lienholders, and the Clerk), and potentially attend hearings. One procedural error can delay or
+                    destroy your claim entirely. That's why most people work with experienced professionals like us.
+                </div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">What if another lienholder or creditor claims my
+                    surplus funds?<span class="faq-icon">+</span></button>
+                <div class="faq-answer">This happens more often than you'd think. Banks, HOAs, government agencies, and
+                    code enforcement boards frequently file competing claims against surplus funds. As your legal team,
+                    we challenge illegitimate and inflated claims in court. This is one of the biggest reasons to work
+                    with us rather than a recovery company — they can't represent you if it goes to a hearing.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">Do I need to come to Florida or appear in
+                    court?<span class="faq-icon">+</span></button>
+                <div class="faq-answer">No. Our entire process is 100% virtual. You sign documents from your phone via
+                    e-Notary, and our attorneys attend all court hearings on your behalf. We serve clients throughout
+                    all 67 Florida counties and you never need to travel.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">How did you get my information? Is this a
+                    scam?<span class="faq-icon">+</span></button>
+                <div class="faq-answer">We obtain contact information from public records related to the property
+                    foreclosure process — these are legal, court-filed documents. Citus Recovery Solutions is a
+                    legitimate company based in St. Petersburg, Florida. We're transparent about our process, our fees,
+                    and our results. If you'd prefer not to be contacted, just let us know and we'll respect that
+                    immediately.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">What's the difference between you and those
+                    recovery companies that send letters?<span class="faq-icon">+</span></button>
+                <div class="faq-answer">Most 'surplus recovery companies' are unregulated, unlicensed third parties who
+                    ask you to sign an 'Assignment of Rights' — essentially giving them your claim in exchange for a cut
+                    (often 30–40%). They can't represent you in court, can't fight competing liens, and many violate
+                    Florida's fee cap under Statute 45.033. We work with licensed attorneys, charge a fair contingency
+                    rate we negotiate case by case, and provide full legal representation from start to finish.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">I'm currently facing foreclosure. Can you help me
+                    keep my home?<span class="faq-icon">+</span></button>
+                <div class="faq-answer">Potentially, yes. Unlike most surplus funds firms, we also offer foreclosure
+                    prevention consulting using creative finance strategies. Depending on your situation, we may be able
+                    to help you explore options like subject-to agreements, seller financing, loan modifications, or
+                    deed-in-lieu negotiations. Even if we determine that we can't directly help, we'll connect you with
+                    the right resources — because our goal is to help you, period.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">What if the foreclosure happened years ago?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">You may still be eligible. While it's best to file as soon as possible, surplus
+                    funds don't immediately vanish. However, if unclaimed for too long, they can be transferred to the
+                    state's unclaimed property division, which adds another layer of complexity. Contact us for a free
+                    check — we'll determine if your funds are still claimable.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">What information do I need to get started?<span
+                        class="faq-icon">+</span></button>
+                <div class="faq-answer">Just some basic information: your name, contact details, and any information
+                    about the foreclosed property (address, county, approximate date). That's it. We handle the
+                    research, the paperwork, and the legal filing. You can get started in under five minutes with a free
+                    consultation.</div>
+            </div>
+            <div class="faq-item">
+                <button class="faq-question" onclick="toggleFaq(this)">What is "creative finance" and how does it relate
+                    to foreclosure?<span class="faq-icon">+</span></button>
+                <div class="faq-answer">Creative finance refers to non-traditional real estate strategies that can help
+                    homeowners avoid foreclosure without relying on banks or conventional refinancing. This includes
+                    subject-to transactions (where an investor takes over your existing mortgage payments), seller
+                    financing, and other structured arrangements that can protect your equity and credit score. We're
+                    one of the few surplus funds firms that also offers this kind of guidance.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     CONTACT FORM
+     ═══════════════════════════════════════════════════ -->
+    <section id="audit" class="contact">
+        <div class="container-sm text-center">
+            <span class="tag tag-emerald">Free · No Obligation · 48-Hour Response</span>
+            <h2 class="section-heading serif">Find Out If You're Owed Money</h2>
+            <p class="section-sub" style="margin-bottom:1rem">Enter your details and our team will search court records
+                across all 67 Florida counties to confirm whether surplus funds exist in your name. This search is
+                completely free.</p>
+            <p style="color:#94a3b8;font-size:.875rem;margin-bottom:3rem">Already facing foreclosure? Tell us in the
+                notes and we'll explore creative options to help you keep your home.</p>
+        </div>
+        <form class="contact-form"
+            onsubmit="event.preventDefault();this.innerHTML='<div style=&quot;text-align:center;padding:4rem 2rem&quot;><div style=&quot;font-size:2.5rem;margin-bottom:1rem&quot;>✓</div><h3 style=&quot;font-size:1.25rem;font-weight:700;margin-bottom:.5rem&quot;>We\'re On It</h3><p style=&quot;color:#64748b;font-size:.875rem&quot;>Our team is searching Florida court records now. You\'ll hear from us within 48 hours.</p></div>'">
+            <div class="form-row form-row-2">
+                <div>
+                    <label for="fname" class="form-label">First Name *</label>
+                    <input type="text" id="fname" required class="form-input" />
+                </div>
+                <div>
+                    <label for="lname" class="form-label">Last Name *</label>
+                    <input type="text" id="lname" required class="form-input" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="email" class="form-label">Email *</label>
+                <input type="email" id="email" required class="form-input" />
+            </div>
+            <div class="form-group">
+                <label for="phone" class="form-label">Phone</label>
+                <input type="tel" id="phone" class="form-input" />
+            </div>
+            <div class="form-row form-row-2">
+                <div>
+                    <label for="county" class="form-label">Florida County</label>
+                    <input type="text" id="county" placeholder="e.g. Miami-Dade, Pinellas, Orange" class="form-input" />
+                </div>
+                <div>
+                    <label for="situation" class="form-label">Your Situation</label>
+                    <select id="situation" class="form-select">
+                        <option value="">Select one...</option>
+                        <option value="surplus">My property was already sold at auction</option>
+                        <option value="foreclosure">I'm currently facing foreclosure</option>
+                        <option value="heir">I'm an heir to a foreclosed property</option>
+                        <option value="letter">I received a letter about surplus funds</option>
+                        <option value="other">Other / Not sure</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="notes" class="form-label">Anything else we should know?</label>
+                <textarea id="notes" rows="3" placeholder="Timeline, property address, questions, etc."
+                    class="form-textarea"></textarea>
+            </div>
+            <button type="submit" class="form-submit">Check My Funds — Free</button>
+            <p class="form-fine">By submitting, you agree to be contacted about your potential claim. No obligation. No
+                cost. You can also <a href="https://calendly.com/citusrecoverysolutions/30min" target="_blank"
+                    rel="noopener noreferrer">book a free consultation directly</a>.</p>
+        </form>
+        <div class="contact-phone">
+            <p>Prefer to talk to a real person right now?</p>
+            <a href="tel:+14074798310" class="phone-number">(407) 479-8310</a>
+            <p class="espanol">Se Habla Español</p>
+            <a href="mailto:citusrecoverysolutions@usa.com" class="email-link">citusrecoverysolutions@usa.com</a>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════ -->
+    <footer class="footer">
+        <div class="footer-inner">
+            <div class="footer-brand">
+                <div class="footer-logo serif">Citus</div>
+                <p class="footer-sub">Recovery Solutions</p>
+                <p class="footer-address">7901 4th St N, Suite 300<br>St. Petersburg, FL 33702</p>
+                <a href="tel:+14074798310" class="footer-phone">(407) 479-8310</a>
+                <a href="mailto:citusrecoverysolutions@usa.com" class="footer-email">citusrecoverysolutions@usa.com</a>
+            </div>
+            <nav class="footer-nav">
+                <a href="#surplus-types">Services</a>
+                <a href="#process">Process</a>
+                <a href="#faq">FAQ</a>
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+            </nav>
+            <div class="footer-right">
+                <p class="espanol">Se Habla Español</p>
+                <p class="copyright">© 2026 Citus Recovery Solutions</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══════════════════════════════════════════════════
+     MINIMAL JS — FAQ accordion + mobile menu
+     ═══════════════════════════════════════════════════ -->
+    <script>
+        function toggleFaq(btn) { var item = btn.parentElement; item.classList.toggle('open') }
+    </script>
+
+</body>
+
+</html>
