@@ -38,9 +38,11 @@ export const OnboardingPortal = () => {
     const [signature, setSignature] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [referenceId, setReferenceId] = useState('');
+    const [submitError, setSubmitError] = useState<string | null>(null);
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
+        setSubmitError(null);
 
         const refId = generateReferenceId();
         setReferenceId(refId);
@@ -52,39 +54,60 @@ export const OnboardingPortal = () => {
 
         const mailingAddress = `${clientInfo.streetAddress}, ${clientInfo.city}, ${clientInfo.state} ${clientInfo.zip}`;
 
-        // Save to Supabase
-        await insertLead({
-            owner_name: `${clientInfo.firstName} ${clientInfo.lastName}`,
-            email: clientInfo.email,
-            phone: clientInfo.phone,
-            property_address: clientInfo.propertyAddress,
-            county: clientInfo.county,
-            case_type: clientInfo.caseType,
-            mailing_address: mailingAddress,
-            notes: clientInfo.notes,
-            source: 'portal',
-            documents: docNames,
-            signature_data: signature || undefined,
-            reference_id: refId,
-        });
+        try {
+            // Save to Supabase
+            console.log('📤 Submitting lead to Supabase...');
+            const { success, error: dbError } = await insertLead({
+                owner_name: `${clientInfo.firstName} ${clientInfo.lastName}`,
+                email: clientInfo.email,
+                phone: clientInfo.phone,
+                property_address: clientInfo.propertyAddress,
+                county: clientInfo.county,
+                case_type: clientInfo.caseType,
+                mailing_address: mailingAddress,
+                notes: clientInfo.notes,
+                source: 'portal',
+                documents: docNames,
+                signature_data: signature || undefined,
+                reference_id: refId,
+            });
 
-        // Send email notification
-        await sendNotificationEmail({
-            clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
-            clientEmail: clientInfo.email,
-            clientPhone: clientInfo.phone,
-            propertyAddress: clientInfo.propertyAddress,
-            county: clientInfo.county,
-            caseType: clientInfo.caseType,
-            documents: docNames,
-            referenceId: refId,
-            mailingAddress,
-            notes: clientInfo.notes,
-        });
+            if (!success) {
+                console.error('❌ Lead insert failed:', dbError);
+                setSubmitError(`Failed to save your submission: ${dbError || 'Unknown error'}. Please try again or call us at (407) 479-8310.`);
+                setIsSubmitting(false);
+                return; // Stop — do NOT show success page
+            }
 
-        setIsSubmitting(false);
-        setCurrentStep(4);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Send email notification
+            console.log('📧 Sending email notification...');
+            const emailSent = await sendNotificationEmail({
+                clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
+                clientEmail: clientInfo.email,
+                clientPhone: clientInfo.phone,
+                propertyAddress: clientInfo.propertyAddress,
+                county: clientInfo.county,
+                caseType: clientInfo.caseType,
+                documents: docNames,
+                referenceId: refId,
+                mailingAddress,
+                notes: clientInfo.notes,
+            });
+
+            if (!emailSent) {
+                console.warn('⚠️ Email notification failed, but lead was saved.');
+                // Don't block — the lead is already in the database
+            }
+
+            console.log('✅ Submission complete — ref:', refId);
+            setIsSubmitting(false);
+            setCurrentStep(4);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+            console.error('❌ Unexpected submission error:', err);
+            setSubmitError('Something went wrong. Please try again or call us at (407) 479-8310.');
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -126,6 +149,17 @@ export const OnboardingPortal = () => {
                         <p className="text-slate-400 text-sm max-w-md mx-auto">
                             Complete the steps below to submit your surplus funds claim. The entire process takes about 5 minutes.
                         </p>
+                    </div>
+                )}
+
+                {/* Submit Error Banner */}
+                {submitError && (
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-2xl text-red-700 text-sm flex items-start gap-3">
+                        <span className="text-lg mt-0.5">⚠️</span>
+                        <div>
+                            <p className="font-bold mb-1">Submission Failed</p>
+                            <p>{submitError}</p>
+                        </div>
                     </div>
                 )}
 

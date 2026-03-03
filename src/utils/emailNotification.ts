@@ -55,9 +55,9 @@ export const sendNotificationEmail = async (data: NotificationData): Promise<boo
     };
 
     if (!EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId || !EMAILJS_CONFIG.publicKey) {
-        console.warn('⚠️  EmailJS env vars not set — logging submission to console.');
+        console.warn('⚠️  EmailJS env vars not set — email NOT sent. Logging submission to console.');
         console.log('📧 Portal Submission:', templateParams);
-        return true;
+        return false; // Signal that email was NOT actually sent
     }
 
     try {
@@ -102,9 +102,9 @@ export const sendContactEmail = async (data: {
     };
 
     if (!EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId || !EMAILJS_CONFIG.publicKey) {
-        console.warn('⚠️  EmailJS env vars not set — logging contact to console.');
+        console.warn('⚠️  EmailJS env vars not set — email NOT sent. Logging contact to console.');
         console.log('📧 Contact Form:', templateParams);
-        return true;
+        return false;
     }
 
     try {

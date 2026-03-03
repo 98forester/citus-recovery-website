@@ -1,13 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables. Check your .env file.');
+    console.error('⚠️ Missing Supabase environment variables (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY). Database writes will fail.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Create client even with empty strings — we guard at insert time
+export const supabase: SupabaseClient = createClient(
+    supabaseUrl || 'https://placeholder.supabase.co',
+    supabaseAnonKey || 'placeholder-key'
+);
 
 // ──────────────────────────────────────────────
 // Leads table schema (create in Supabase Dashboard → SQL Editor):
@@ -59,13 +63,26 @@ export interface LeadInsert {
 }
 
 export const insertLead = async (lead: LeadInsert): Promise<{ success: boolean; error?: string }> => {
-    const { error } = await supabase.from('leads').insert([lead]);
-
-    if (error) {
-        console.error('❌ Supabase insert failed:', error.message);
-        return { success: false, error: error.message };
+    // Guard: if env vars are missing, fail loudly instead of silently
+    if (!supabaseUrl || !supabaseAnonKey) {
+        const msg = 'Supabase environment variables are not configured. Cannot save lead.';
+        console.error('❌', msg);
+        return { success: false, error: msg };
     }
 
-    console.log('✅ Lead saved to Supabase:', lead.owner_name);
-    return { success: true };
+    try {
+        const { error } = await supabase.from('leads').insert([lead]);
+
+        if (error) {
+            console.error('❌ Supabase insert failed:', error.message);
+            return { success: false, error: error.message };
+        }
+
+        console.log('✅ Lead saved to Supabase:', lead.owner_name);
+        return { success: true };
+    } catch (err) {
+        const msg = err instanceof Error ? err.message : 'Unknown network error';
+        console.error('❌ Supabase request failed:', msg);
+        return { success: false, error: msg };
+    }
 };
