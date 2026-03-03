@@ -30,7 +30,7 @@ export const SignaturePad = ({ onSignatureChange, label = 'Your Signature' }: Si
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         ctx.scale(2, 2);
-        ctx.strokeStyle = '#1e293b';
+        ctx.strokeStyle = '#000000';
         ctx.lineWidth = 2;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
@@ -124,8 +124,8 @@ export const SignaturePad = ({ onSignatureChange, label = 'Your Signature' }: Si
                     onTouchMove={draw}
                     onTouchEnd={stopDrawing}
                     className={`w-full h-40 rounded-2xl border-2 cursor-crosshair transition-all duration-200 ${hasSignature
-                            ? 'border-emerald-300 bg-white'
-                            : 'border-dashed border-slate-200 bg-white hover:border-slate-300'
+                        ? 'border-emerald-300 bg-white'
+                        : 'border-dashed border-slate-200 bg-white hover:border-slate-300'
                         }`}
                     style={{ touchAction: 'none' }}
                 />
