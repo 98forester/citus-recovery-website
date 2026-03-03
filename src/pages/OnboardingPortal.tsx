@@ -74,7 +74,7 @@ export const OnboardingPortal = () => {
 
             if (!success) {
                 console.error('❌ Lead insert failed:', dbError);
-                setSubmitError(`Failed to save your submission: ${dbError || 'Unknown error'}. Please try again or call us at (407) 479-8310.`);
+                setSubmitError(`Failed to save your submission: ${dbError || 'Unknown error'}. Please try again or call us at (407) 917-8640.`);
                 setIsSubmitting(false);
                 return; // Stop — do NOT show success page
             }
@@ -96,7 +96,7 @@ export const OnboardingPortal = () => {
 
             if (!adminEmailSent) {
                 console.error('❌ Admin email failed');
-                setSubmitError('Your information was saved, but we could not send the notification email. Please call us at (407) 479-8310 to confirm your submission.');
+                setSubmitError('Your information was saved, but we could not send the notification email. Please call us at (407) 917-8640 to confirm your submission.');
                 setIsSubmitting(false);
                 return;
             }
@@ -119,7 +119,7 @@ export const OnboardingPortal = () => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } catch (err) {
             console.error('❌ Unexpected submission error:', err);
-            setSubmitError('Something went wrong. Please try again or call us at (407) 479-8310.');
+            setSubmitError('Something went wrong. Please try again or call us at (407) 917-8640.');
             setIsSubmitting(false);
         }
     };

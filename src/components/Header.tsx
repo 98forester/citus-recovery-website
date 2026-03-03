@@ -70,7 +70,7 @@ export const Header = () => {
           >
             Start Your Claim
           </Link>
-          <a href="tel:+14074798310" className="text-emerald-600 text-center">(407) 479-8310</a>
+          <a href="tel:+14079178640" className="text-emerald-600 text-center">(407) 917-8640</a>
         </nav>
       )}
     </header>

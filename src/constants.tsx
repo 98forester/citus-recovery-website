@@ -4,8 +4,8 @@ import { Testimonial, ServiceStep, FAQItem, SurplusType, Stat } from './types';
 // COMPANY INFO — Real data from citusrecoverysolutions.com
 // ────────────────────────────────────────────────────
 export const COMPANY = {
-  phone: "(407) 479-8310",
-  phoneTel: "+14074798310",
+  phone: "(407) 917-8640",
+  phoneTel: "+14079178640",
   email: "support@citusrecoverysolutions.com",
   calendly: "https://calendly.com/citusrecoverysolutions/30min",
   address: "7901 4th St N, Suite 300",

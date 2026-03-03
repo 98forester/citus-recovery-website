@@ -64,7 +64,7 @@ export const HomePage = () => {
                 <li><strong>Once you sign an Assignment of Rights, it's extremely difficult to undo</strong> — even if you later find a better option.</li>
               </ul>
               <p className="mt-6 font-medium text-slate-700">
-                If you've already received a letter, don't panic — and don't sign. Call us at <strong>(407) 479-8310</strong> for a free, no-obligation review of your situation. We'll tell you honestly whether we can help, how much you're likely owed, and what your best path forward is.
+                If you've already received a letter, don't panic — and don't sign. Call us at <strong>(407) 917-8640</strong> for a free, no-obligation review of your situation. We'll tell you honestly whether we can help, how much you're likely owed, and what your best path forward is.
               </p>
             </div>
           </div>
