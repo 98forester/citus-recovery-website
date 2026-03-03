@@ -28,8 +28,6 @@ const INITIAL_CLIENT_INFO: ClientInfo = {
 
 const INITIAL_DOCUMENTS: DocumentFiles = {
     driversLicense: [],
-    utilityBill: [],
-    w9Form: [],
     additionalDocs: [],
 };
 
@@ -50,8 +48,6 @@ export const OnboardingPortal = () => {
         // Collect document names
         const docNames: string[] = [];
         if (documents.driversLicense.length > 0) docNames.push("Driver's License");
-        if (documents.utilityBill.length > 0) docNames.push('Utility Bill');
-        if (documents.w9Form.length > 0) docNames.push('W9 Form');
         documents.additionalDocs.forEach((f) => docNames.push(f.name));
 
         const mailingAddress = `${clientInfo.streetAddress}, ${clientInfo.city}, ${clientInfo.state} ${clientInfo.zip}`;
@@ -184,6 +180,11 @@ export const OnboardingPortal = () => {
                             key="step4"
                             referenceId={referenceId}
                             clientName={clientInfo.firstName}
+                            clientFirstName={clientInfo.firstName}
+                            clientLastName={clientInfo.lastName}
+                            propertyAddress={clientInfo.propertyAddress}
+                            county={clientInfo.county}
+                            signatureDataUrl={signature}
                         />
                     )}
                 </AnimatePresence>

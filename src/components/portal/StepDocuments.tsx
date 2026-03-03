@@ -4,8 +4,6 @@ import { Shield } from 'lucide-react';
 
 export interface DocumentFiles {
     driversLicense: File[];
-    utilityBill: File[];
-    w9Form: File[];
     additionalDocs: File[];
 }
 
@@ -63,22 +61,6 @@ export const StepDocuments = ({ data, onChange, onNext, onBack }: StepDocumentsP
                 />
 
                 <FileUploadCard
-                    label="Utility Bill (Proof of Address)"
-                    description="Recent utility bill showing your current mailing address"
-                    accept=".pdf,.jpg,.jpeg,.png,.heic"
-                    files={data.utilityBill}
-                    onFilesChange={(files) => updateField('utilityBill', files)}
-                />
-
-                <FileUploadCard
-                    label="W9 Form"
-                    description="Required by some counties for tax reporting purposes"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    files={data.w9Form}
-                    onFilesChange={(files) => updateField('w9Form', files)}
-                />
-
-                <FileUploadCard
                     label="Additional Documents"
                     description="Any other relevant documents (deed, court notices, letters received, etc.)"
                     accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
@@ -100,8 +82,8 @@ export const StepDocuments = ({ data, onChange, onNext, onBack }: StepDocumentsP
                     type="submit"
                     disabled={!canProceed}
                     className={`flex-[2] py-4 rounded-full font-bold text-sm uppercase tracking-widest transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${canProceed
-                            ? 'bg-slate-900 text-white hover:bg-slate-700 focus:ring-slate-900'
-                            : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                        ? 'bg-slate-900 text-white hover:bg-slate-700 focus:ring-slate-900'
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed'
                         }`}
                 >
                     Continue to Review →

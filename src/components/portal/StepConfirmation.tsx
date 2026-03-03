@@ -1,13 +1,51 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Phone, Mail, Clock, ArrowRight } from 'lucide-react';
+import { CheckCircle, Phone, Mail, Clock, ArrowRight, Download, Loader2 } from 'lucide-react';
 import { COMPANY } from '../../constants';
+import { generateSignedAgreement } from '../../utils/generateAgreement';
 
 interface StepConfirmationProps {
     referenceId: string;
     clientName: string;
+    clientFirstName: string;
+    clientLastName: string;
+    propertyAddress: string;
+    county: string;
+    signatureDataUrl: string | null;
 }
 
-export const StepConfirmation = ({ referenceId, clientName }: StepConfirmationProps) => {
+export const StepConfirmation = ({
+    referenceId,
+    clientName,
+    clientFirstName,
+    clientLastName,
+    propertyAddress,
+    county,
+    signatureDataUrl,
+}: StepConfirmationProps) => {
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [downloaded, setDownloaded] = useState(false);
+
+    const handleDownload = async () => {
+        setIsGenerating(true);
+        try {
+            await generateSignedAgreement(
+                {
+                    clientName: `${clientFirstName} ${clientLastName}`,
+                    propertyAddress,
+                    county,
+                    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+                },
+                signatureDataUrl
+            );
+            setDownloaded(true);
+        } catch (err) {
+            console.error('Failed to generate agreement:', err);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -31,6 +69,46 @@ export const StepConfirmation = ({ referenceId, clientName }: StepConfirmationPr
                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Reference Number</span>
                 <span className="text-xl font-mono font-bold text-slate-800 tracking-wider">{referenceId}</span>
             </div>
+
+            {/* Download Signed Agreement */}
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="mb-10"
+            >
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-3">Your Signed Agreement</p>
+                    <p className="text-sm text-slate-600 mb-4">
+                        Download a copy of the Services Agreement you just signed for your records.
+                    </p>
+                    <button
+                        onClick={handleDownload}
+                        disabled={isGenerating}
+                        className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${downloaded
+                                ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-200'
+                                : 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600 shadow-lg shadow-emerald-600/25'
+                            }`}
+                    >
+                        {isGenerating ? (
+                            <>
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                                Generating...
+                            </>
+                        ) : downloaded ? (
+                            <>
+                                <CheckCircle className="w-4 h-4" />
+                                Downloaded
+                            </>
+                        ) : (
+                            <>
+                                <Download className="w-4 h-4" />
+                                Download Signed Agreement
+                            </>
+                        )}
+                    </button>
+                </div>
+            </motion.div>
 
             <div className="max-w-md mx-auto text-left space-y-0 mb-10">
                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-4 text-center">What Happens Next</h3>
