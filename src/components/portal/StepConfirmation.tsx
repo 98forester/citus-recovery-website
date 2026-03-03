@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, Phone, Mail, Clock, ArrowRight, Download, Loader2 } from 'lucide-react';
+import { CheckCircle, Phone, Mail, Clock, FileText, Download, Loader2 } from 'lucide-react';
 import { COMPANY } from '../../constants';
 import { generateSignedAgreement } from '../../utils/generateAgreement';
 
@@ -62,8 +62,8 @@ export const StepConfirmation = ({
                 <CheckCircle className="w-10 h-10 text-emerald-600" />
             </motion.div>
 
-            <h2 className="text-3xl font-serif italic mb-2">You're All Set, {clientName}!</h2>
-            <p className="text-slate-500 mb-2">Your claim has been submitted successfully.</p>
+            <h2 className="text-3xl font-serif italic mb-2">Success, {clientName}!</h2>
+            <p className="text-slate-500 mb-2">Your Service Agreement has been received and our recovery specialists are now assigned to your case.</p>
 
             <div className="inline-block bg-slate-50 border border-slate-200 rounded-xl px-6 py-3 mb-8">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Reference Number</span>
@@ -86,8 +86,8 @@ export const StepConfirmation = ({
                         onClick={handleDownload}
                         disabled={isGenerating}
                         className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${downloaded
-                                ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-200'
-                                : 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600 shadow-lg shadow-emerald-600/25'
+                            ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-200'
+                            : 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600 shadow-lg shadow-emerald-600/25'
                             }`}
                     >
                         {isGenerating ? (
@@ -113,9 +113,9 @@ export const StepConfirmation = ({
             <div className="max-w-md mx-auto text-left space-y-0 mb-10">
                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-4 text-center">What Happens Next</h3>
                 {[
-                    { icon: Clock, title: 'Within 24 Hours', desc: 'Our team reviews your submission and verifies all documents.' },
-                    { icon: Phone, title: 'Within 48 Hours', desc: 'We contact you to confirm your claim details and discuss next steps.' },
-                    { icon: ArrowRight, title: '30-60 Days', desc: 'Your claim is filed with the court and we fight for your recovery.' },
+                    { icon: FileText, title: 'File Review', desc: 'We are verifying your documentation against the County Clerk\'s latest records.' },
+                    { icon: Clock, title: 'Form Preparation', desc: 'We will prepare the official LPOA and Surplus Claim forms for your specific case.' },
+                    { icon: Phone, title: 'Identity Verification', desc: 'Once ready, we will contact you to coordinate a brief identity verification session with a licensed Florida Notary.' },
                 ].map((item, i) => (
                     <motion.div
                         key={i}
@@ -134,6 +134,8 @@ export const StepConfirmation = ({
                     </motion.div>
                 ))}
             </div>
+
+            <p className="text-sm text-slate-500 mb-8 italic">A confirmation has been sent to your email.</p>
 
             <div className="bg-slate-50 rounded-2xl p-6">
                 <p className="text-sm text-slate-500 mb-3">Have questions? We're here to help.</p>

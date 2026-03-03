@@ -7,7 +7,7 @@ import { StepClientInfo, ClientInfo } from '../components/portal/StepClientInfo'
 import { StepDocuments, DocumentFiles } from '../components/portal/StepDocuments';
 import { StepReviewSign } from '../components/portal/StepReviewSign';
 import { StepConfirmation } from '../components/portal/StepConfirmation';
-import { sendNotificationEmail, generateReferenceId } from '../utils/emailNotification';
+import { sendNotificationEmail, sendClaimantWelcomeEmail, generateReferenceId } from '../utils/emailNotification';
 import { insertLead } from '../utils/supabaseClient';
 import { COMPANY } from '../constants';
 
@@ -79,9 +79,9 @@ export const OnboardingPortal = () => {
                 return; // Stop — do NOT show success page
             }
 
-            // Send email notification
-            console.log('📧 Sending email notification...');
-            const emailSent = await sendNotificationEmail({
+            // 2. Send admin notification email (template_fzhb2n2)
+            console.log('📧 Sending admin notification email...');
+            const adminEmailSent = await sendNotificationEmail({
                 clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
                 clientEmail: clientInfo.email,
                 clientPhone: clientInfo.phone,
@@ -94,9 +94,23 @@ export const OnboardingPortal = () => {
                 notes: clientInfo.notes,
             });
 
-            if (!emailSent) {
-                console.warn('⚠️ Email notification failed, but lead was saved.');
-                // Don't block — the lead is already in the database
+            if (!adminEmailSent) {
+                console.error('❌ Admin email failed');
+                setSubmitError('Your information was saved, but we could not send the notification email. Please call us at (407) 479-8310 to confirm your submission.');
+                setIsSubmitting(false);
+                return;
+            }
+
+            // 3. Send claimant welcome email (template_f69k4vn)
+            console.log('📧 Sending claimant welcome email...');
+            const welcomeEmailSent = await sendClaimantWelcomeEmail({
+                name: `${clientInfo.firstName} ${clientInfo.lastName}`,
+                email: clientInfo.email,
+                referenceId: refId,
+            });
+
+            if (!welcomeEmailSent) {
+                console.warn('⚠️ Claimant welcome email failed, but lead and admin notification succeeded.');
             }
 
             console.log('✅ Submission complete — ref:', refId);

@@ -8,13 +8,15 @@ import emailjs from '@emailjs/browser';
 
 const EMAILJS_CONFIG = {
     serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_y10ie4a',
-    templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_fzhb2n2',
+    adminTemplateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_fzhb2n2',
+    claimantTemplateId: 'template_f69k4vn',
     publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'X5nkuSfJFV7BM7yLZ',
 };
 
 console.log('[EmailJS] Config loaded:', {
     serviceId: EMAILJS_CONFIG.serviceId ? '✅ set' : '❌ missing',
-    templateId: EMAILJS_CONFIG.templateId ? '✅ set' : '❌ missing',
+    adminTemplateId: EMAILJS_CONFIG.adminTemplateId ? '✅ set' : '❌ missing',
+    claimantTemplateId: EMAILJS_CONFIG.claimantTemplateId ? '✅ set' : '❌ missing',
     publicKey: EMAILJS_CONFIG.publicKey ? '✅ set' : '❌ missing',
 });
 
@@ -40,6 +42,7 @@ const CASE_TYPE_LABELS: Record<string, string> = {
     other: 'Other / Not Sure',
 };
 
+// ── Admin notification email (template_fzhb2n2) ──────────────
 export const sendNotificationEmail = async (data: NotificationData): Promise<boolean> => {
     const templateParams = {
         client_name: data.clientName,
@@ -58,23 +61,44 @@ export const sendNotificationEmail = async (data: NotificationData): Promise<boo
         }),
     };
 
-    if (!EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId || !EMAILJS_CONFIG.publicKey) {
-        console.warn('⚠️  EmailJS env vars not set — email NOT sent. Logging submission to console.');
-        console.log('📧 Portal Submission:', templateParams);
-        return false; // Signal that email was NOT actually sent
+    try {
+        await emailjs.send(
+            EMAILJS_CONFIG.serviceId,
+            EMAILJS_CONFIG.adminTemplateId,
+            templateParams,
+            EMAILJS_CONFIG.publicKey
+        );
+        console.log('✅ Admin notification email sent successfully');
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to send admin notification email:', error);
+        return false;
     }
+};
+
+// ── Claimant welcome email (template_f69k4vn) ──────────────
+export const sendClaimantWelcomeEmail = async (data: {
+    name: string;
+    email: string;
+    referenceId: string;
+}): Promise<boolean> => {
+    const templateParams = {
+        client_name: data.name,
+        client_email: data.email,
+        reference_id: data.referenceId,
+    };
 
     try {
         await emailjs.send(
             EMAILJS_CONFIG.serviceId,
-            EMAILJS_CONFIG.templateId,
+            EMAILJS_CONFIG.claimantTemplateId,
             templateParams,
             EMAILJS_CONFIG.publicKey
         );
-        console.log('✅ Email notification sent successfully');
+        console.log('✅ Claimant welcome email sent to:', data.email);
         return true;
     } catch (error) {
-        console.error('❌ Failed to send email notification:', error);
+        console.error('❌ Failed to send claimant welcome email:', error);
         return false;
     }
 };
@@ -105,16 +129,10 @@ export const sendContactEmail = async (data: {
         }),
     };
 
-    if (!EMAILJS_CONFIG.serviceId || !EMAILJS_CONFIG.templateId || !EMAILJS_CONFIG.publicKey) {
-        console.warn('⚠️  EmailJS env vars not set — email NOT sent. Logging contact to console.');
-        console.log('📧 Contact Form:', templateParams);
-        return false;
-    }
-
     try {
         await emailjs.send(
             EMAILJS_CONFIG.serviceId,
-            EMAILJS_CONFIG.templateId,
+            EMAILJS_CONFIG.adminTemplateId,
             templateParams,
             EMAILJS_CONFIG.publicKey
         );
