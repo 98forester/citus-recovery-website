@@ -1,17 +1,21 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// ──────────────────────────────────────────────
+// Supabase Configuration
+// Uses VITE_ env vars if available, falls back to hardcoded values.
+// The anon key is a PUBLIC client-side key (safe to include in source).
+// Row Level Security on the database controls access.
+// ──────────────────────────────────────────────
 
-if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('⚠️ Missing Supabase environment variables (VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY). Database writes will fail.');
-}
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bmtmzvksmpzffgxslwzp.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtdG16dmtzbXB6ZmZneHNsd3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzM5NDcsImV4cCI6MjA4ODA0OTk0N30.z9GOSAcMCH-h8cXo4KJ2Mu-_b5PWqUeR3pNIBuS_jy4';
 
-// Create client even with empty strings — we guard at insert time
-export const supabase: SupabaseClient = createClient(
-    supabaseUrl || 'https://placeholder.supabase.co',
-    supabaseAnonKey || 'placeholder-key'
-);
+console.log('[Supabase] Config loaded:', {
+    url: supabaseUrl ? '✅ set' : '❌ missing',
+    anonKey: supabaseAnonKey ? '✅ set' : '❌ missing',
+});
+
+export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKey);
 
 // ──────────────────────────────────────────────
 // Leads table schema (create in Supabase Dashboard → SQL Editor):
@@ -63,12 +67,6 @@ export interface LeadInsert {
 }
 
 export const insertLead = async (lead: LeadInsert): Promise<{ success: boolean; error?: string }> => {
-    // Guard: if env vars are missing, fail loudly instead of silently
-    if (!supabaseUrl || !supabaseAnonKey) {
-        const msg = 'Supabase environment variables are not configured. Cannot save lead.';
-        console.error('❌', msg);
-        return { success: false, error: msg };
-    }
 
     try {
         const { error } = await supabase.from('leads').insert([lead]);

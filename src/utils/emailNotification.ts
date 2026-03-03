@@ -1,18 +1,22 @@
 import emailjs from '@emailjs/browser';
 
 // ──────────────────────────────────────────────
-// EmailJS Configuration — reads from environment variables
-// Set these in .env (prefixed with VITE_ for Vite):
-//   VITE_EMAILJS_SERVICE_ID
-//   VITE_EMAILJS_TEMPLATE_ID
-//   VITE_EMAILJS_PUBLIC_KEY
+// EmailJS Configuration
+// Uses VITE_ env vars if available, falls back to hardcoded values.
+// These are PUBLIC client-side keys (safe to include in source).
 // ──────────────────────────────────────────────
 
 const EMAILJS_CONFIG = {
-    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || '',
-    templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '',
-    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || '',
+    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_y10ie4a',
+    templateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_fzhb2n2',
+    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'X5nkuSfJFV7BM7yLZ',
 };
+
+console.log('[EmailJS] Config loaded:', {
+    serviceId: EMAILJS_CONFIG.serviceId ? '✅ set' : '❌ missing',
+    templateId: EMAILJS_CONFIG.templateId ? '✅ set' : '❌ missing',
+    publicKey: EMAILJS_CONFIG.publicKey ? '✅ set' : '❌ missing',
+});
 
 interface NotificationData {
     clientName: string;
