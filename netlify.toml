@@ -6,11 +6,15 @@
   publish = "dist"
 
 # ── Serverless Function Redirects ─────────────────
-# launch-outreach uses Node.js runtime for Gmail SMTP (nodemailer)
 # IMPORTANT: Must come BEFORE the SPA catch-all redirect
 [[redirects]]
   from = "/api/launch-outreach"
   to = "/.netlify/functions/launch-outreach"
+  status = 200
+
+[[redirects]]
+  from = "/api/check-claim"
+  to = "/.netlify/functions/check-claim"
   status = 200
 
 # SPA routing — redirect all paths to index.html
@@ -48,6 +52,11 @@
 [[edge_functions]]
   path = "/api/track-click"
   function = "track-click"
+
+# ── Scheduled Functions ───────────────────────────
+# Follow-up scheduler runs every 6 hours
+[functions."follow-up-scheduler"]
+  schedule = "0 */6 * * *"
 
 # Environment variables required (set in Netlify Dashboard):
 # SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY

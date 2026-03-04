@@ -33,6 +33,11 @@ interface Lead {
     waiting_period_end: string | null;
     liens: unknown;
     competing_claims: unknown;
+    claim_status: string | null;
+    claim_details: Record<string, unknown> | null;
+    follow_up_step: number | null;
+    sequence_active: boolean | null;
+    next_follow_up_at: string | null;
 }
 
 type FilterStatus = 'all' | 'pending_review' | 'qualified' | 'needs_review' | 'outreach_sent' | 'HOT_LEAD' | 'low_value';
@@ -45,6 +50,7 @@ export function CommandCenter() {
     const [filterTier, setFilterTier] = useState<FilterTier>('all');
     const [searchQuery, setSearchQuery] = useState('');
     const [outreachLoading, setOutreachLoading] = useState<string | null>(null);
+    const [claimCheckLoading, setClaimCheckLoading] = useState<string | null>(null);
     const [expandedMemo, setExpandedMemo] = useState<string | null>(null);
 
     // ── Fetch leads ────────────────────────────────────────────
@@ -141,6 +147,41 @@ export function CommandCenter() {
             fetchLeads();
         } catch (err) {
             alert(`Qualify error: ${err}`);
+        }
+    };
+
+    // ── Check Claim ───────────────────────────────────────────
+    const handleCheckClaim = async (lead: Lead) => {
+        if (!lead.case_number || !lead.county) {
+            // No case number — open realtdm for the county in a new tab
+            alert('This lead has no case number. Please add one before checking claims.');
+            return;
+        }
+
+        setClaimCheckLoading(lead.id);
+        try {
+            const res = await fetch('/api/check-claim', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lead_id: lead.id }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                alert(`Claim check failed: ${data.error || 'Unknown error'}`);
+                return;
+            }
+
+            // Open the realtdm URL in a new tab for manual verification
+            if (data.realtdm_url) {
+                window.open(data.realtdm_url, '_blank');
+            }
+
+            fetchLeads();
+        } catch (err) {
+            alert(`Claim check error: ${err}`);
+        } finally {
+            setClaimCheckLoading(null);
         }
     };
 
@@ -302,9 +343,11 @@ export function CommandCenter() {
                                                 lead={lead}
                                                 isExpanded={expandedMemo === lead.id}
                                                 isOutreachLoading={outreachLoading === lead.id}
+                                                isClaimCheckLoading={claimCheckLoading === lead.id}
                                                 onToggleMemo={() => setExpandedMemo(expandedMemo === lead.id ? null : lead.id)}
                                                 onLaunchOutreach={() => handleLaunchOutreach(lead.id)}
                                                 onQualify={() => handleQualifyLead(lead.id)}
+                                                onCheckClaim={() => handleCheckClaim(lead)}
                                                 isTier1
                                             />
                                         ))}
@@ -331,9 +374,11 @@ export function CommandCenter() {
                                                 lead={lead}
                                                 isExpanded={expandedMemo === lead.id}
                                                 isOutreachLoading={outreachLoading === lead.id}
+                                                isClaimCheckLoading={claimCheckLoading === lead.id}
                                                 onToggleMemo={() => setExpandedMemo(expandedMemo === lead.id ? null : lead.id)}
                                                 onLaunchOutreach={() => handleLaunchOutreach(lead.id)}
                                                 onQualify={() => handleQualifyLead(lead.id)}
+                                                onCheckClaim={() => handleCheckClaim(lead)}
                                             />
                                         ))}
                                 </div>

@@ -66,8 +66,9 @@ function buildEmailHTML(lead: {
 }): string {
     const siteUrl = process.env.SITE_URL || "https://citusrecoverysolutions.com";
     const trackLink = `${siteUrl}/api/track-click?lead_id=${lead.id}&redirect=${encodeURIComponent(siteUrl + "/portal")}`;
-    const surplusDisplay = lead.surplus_amount || "unclaimed funds";
-    const firstName = lead.owner_name?.split(" ")[0] || "there";
+    const surplusDisplay = lead.surplus_amount || "an undisclosed amount";
+    const fullName = lead.owner_name || "Property Owner";
+    const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     return `
 <!DOCTYPE html>
@@ -76,55 +77,86 @@ function buildEmailHTML(lead: {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; }
-    .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-    .header { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); padding: 32px 24px; text-align: center; }
-    .header h1 { color: #ffffff; font-size: 22px; margin: 0; font-weight: 600; }
-    .header p { color: rgba(255,255,255,0.6); font-size: 13px; margin: 8px 0 0; }
-    .body { padding: 32px 24px; }
-    .body h2 { color: #1a1a2e; font-size: 18px; margin: 0 0 16px; }
-    .body p { color: #444; font-size: 15px; line-height: 1.6; margin: 0 0 16px; }
-    .highlight { background: #f0f4ff; border-left: 4px solid #4f46e5; padding: 16px; border-radius: 0 8px 8px 0; margin: 20px 0; }
-    .highlight p { color: #1a1a2e; font-weight: 600; margin: 0; }
-    .cta { display: block; text-align: center; margin: 24px 0; }
-    .cta a { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 15px; display: inline-block; }
-    .footer { background: #f9f9fb; padding: 20px 24px; text-align: center; border-top: 1px solid #eee; }
-    .footer p { color: #888; font-size: 11px; line-height: 1.5; margin: 0; }
+    body { margin: 0; padding: 0; font-family: Georgia, 'Times New Roman', Times, serif; background: #f7f7f7; color: #1a1a1a; }
+    .container { max-width: 620px; margin: 0 auto; background: #ffffff; border: 1px solid #d4d4d4; }
+    .header { background: #1a1a2e; padding: 24px 32px; border-bottom: 3px solid #7c3aed; }
+    .header h1 { color: #ffffff; font-size: 18px; margin: 0; font-weight: 700; letter-spacing: 0.5px; }
+    .header p { color: rgba(255,255,255,0.5); font-size: 11px; margin: 4px 0 0; letter-spacing: 1px; text-transform: uppercase; }
+    .body { padding: 32px; font-size: 14px; line-height: 1.75; }
+    .date { color: #666; font-size: 13px; margin: 0 0 24px; }
+    .body p { margin: 0 0 14px; }
+    .ref-box { background: #f8f9fa; border: 1px solid #e2e2e2; padding: 16px 20px; margin: 20px 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    .ref-box table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .ref-box td { padding: 4px 0; vertical-align: top; }
+    .ref-box td:first-child { font-weight: 600; color: #444; width: 140px; }
+    .ref-box td:last-child { color: #1a1a1a; }
+    .cta { text-align: center; margin: 28px 0; }
+    .cta a { background: #1a1a2e; color: #ffffff; text-decoration: none; padding: 12px 28px; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; }
+    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e2e2; font-size: 13px; }
+    .signature strong { display: block; margin-bottom: 2px; }
+    .footer { background: #f8f9fa; padding: 16px 32px; border-top: 1px solid #e2e2e2; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    .footer p { color: #888; font-size: 10px; line-height: 1.5; margin: 0; }
+    .legal { font-size: 11px; color: #888; margin-top: 16px; font-style: italic; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>Citus Recovery Solutions</h1>
-      <p>Surplus Funds Recovery Specialists</p>
+      <p>Surplus Funds Recovery</p>
     </div>
     <div class="body">
-      <h2>Hi ${firstName},</h2>
-      <p>I'm reaching out because our records indicate you may be entitled to <strong>surplus funds</strong> from a recent property matter${lead.county ? ` in <strong>${lead.county} County</strong>` : ""}.</p>
-      
-      <div class="highlight">
-        <p>${lead.case_number ? `Case #${lead.case_number} — ` : ""}Estimated surplus: ${surplusDisplay}</p>
+      <p class="date">${today}</p>
+
+      <p>Dear ${fullName},</p>
+
+      <p>Our office has identified surplus funds that may be owed to you in connection with a recent property matter${lead.county ? ` in <strong>${lead.county} County, Florida</strong>` : " in the State of Florida"}. Under Florida Statute §197.582, former property owners and eligible parties are entitled to claim surplus proceeds resulting from tax deed or foreclosure sales.</p>
+
+      <div class="ref-box">
+        <table>
+          ${lead.case_number ? `<tr><td>Case Reference:</td><td>${lead.case_number}</td></tr>` : ""}
+          <tr><td>Estimated Surplus:</td><td><strong>${surplusDisplay}</strong></td></tr>
+          ${lead.county ? `<tr><td>Jurisdiction:</td><td>${lead.county} County, FL</td></tr>` : ""}
+          ${lead.property_address ? `<tr><td>Property Address:</td><td>${lead.property_address}</td></tr>` : ""}
+        </table>
       </div>
-      
-      <p>Many property owners are unaware these funds exist. Our team specializes in locating and recovering surplus funds for eligible claimants — <strong>at no upfront cost to you</strong>.</p>
-      
-      <p>If you'd like to learn more about your potential claim, simply click below to get started:</p>
-      
+
+      <p>Citus Recovery Solutions assists eligible claimants in navigating the surplus funds recovery process. Our services include case research, document preparation, court filing, and claim follow-through. There is no upfront cost — our fee is contingent upon successful recovery of your funds.</p>
+
+      <p>If you believe you may be the rightful claimant, we encourage you to review the details of your potential claim at your earliest convenience.</p>
+
       <div class="cta">
-        <a href="${trackLink}">Learn About My Claim →</a>
+        <a href="${trackLink}">Review Your Claim Details</a>
       </div>
-      
-      <p style="font-size: 13px; color: #666;">We handle all the paperwork, court filings, and follow-up so you don't have to. Our fee is only collected if we successfully recover your funds.</p>
+
+      <p>Should you have any questions, or if you wish to discuss this matter directly, please do not hesitate to contact our office.</p>
+
+      <div class="signature">
+        <strong>Citus Recovery Solutions LLC</strong>
+        Recovery Services Department<br>
+        <a href="${siteUrl}" style="color: #7c3aed; text-decoration: none;">citusrecoverysolutions.com</a>
+      </div>
+
+      <p class="legal">This correspondence is intended solely for the individual(s) named above. If you are not the intended recipient, please disregard this message. To opt out of future communications, reply with "STOP." This is not legal advice and does not constitute an attorney-client relationship.</p>
     </div>
     <div class="footer">
-      <p>Citus Recovery Solutions LLC<br>
-      ${lead.property_address ? `Re: ${lead.property_address}<br>` : ""}
-      <a href="${siteUrl}" style="color: #7c3aed;">citusrecoverysolutions.com</a></p>
-      <p style="margin-top: 8px;">If you received this message in error or wish to opt out, please reply with "STOP".</p>
+      <p>Citus Recovery Solutions LLC${lead.property_address ? ` · Re: ${lead.property_address}` : ""}</p>
     </div>
   </div>
 </body>
 </html>`;
+}
+
+// ── Email subject line ───────────────────────────────────
+function buildSubject(lead: { owner_name: string; county: string | null; case_number: string | null }): string {
+    const name = lead.owner_name || "Property Owner";
+    if (lead.case_number) {
+        return `Notice Regarding Surplus Funds — ${lead.case_number}`;
+    }
+    if (lead.county) {
+        return `${name} — Surplus Funds Inquiry, ${lead.county} County`;
+    }
+    return `${name} — Surplus Funds Recovery Notice`;
 }
 
 // ── Main handler ─────────────────────────────────────────
@@ -190,16 +222,20 @@ const handler: Handler = async (event: HandlerEvent) => {
         await transporter.sendMail({
             from: `"Citus Recovery Solutions" <${process.env.GMAIL_USER}>`,
             to: lead.email,
-            subject: `${lead.owner_name?.split(" ")[0] || "Hello"}, you may have unclaimed surplus funds`,
+            subject: buildSubject(lead),
             html: htmlBody,
         });
 
-        // Update lead status
+        // Update lead status + activate follow-up sequence
+        const nextFollowUp = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000); // Day 1 follow-up
         await supabase
             .from("leads")
             .update({
                 status: "outreach_sent",
                 outreach_sent_at: new Date().toISOString(),
+                follow_up_step: 0,
+                sequence_active: true,
+                next_follow_up_at: nextFollowUp.toISOString(),
             })
             .eq("id", lead_id);
 

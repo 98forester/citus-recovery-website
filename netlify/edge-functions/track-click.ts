@@ -56,10 +56,13 @@ export default async function handler(request: Request) {
 
         const supabase = createClient(supabaseUrl, supabaseKey);
 
-        // ── Update lead status to HOT_LEAD ───────────────────────
+        // ── Update lead status to HOT_LEAD + stop follow-up sequence ─
         const { error: updateError } = await supabase
             .from("leads")
-            .update({ status: "HOT_LEAD" })
+            .update({
+                status: "HOT_LEAD",
+                sequence_active: false,
+            })
             .eq("id", leadId);
 
         if (updateError) {

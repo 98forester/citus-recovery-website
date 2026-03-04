@@ -27,6 +27,11 @@ interface Lead {
     waiting_period_end: string | null;
     liens: unknown;
     competing_claims: unknown;
+    claim_status: string | null;
+    claim_details: Record<string, unknown> | null;
+    follow_up_step: number | null;
+    sequence_active: boolean | null;
+    next_follow_up_at: string | null;
 }
 
 interface LeadCardProps {
@@ -36,6 +41,8 @@ interface LeadCardProps {
     onToggleMemo: () => void;
     onLaunchOutreach: () => void;
     onQualify: () => void;
+    onCheckClaim?: () => void;
+    isClaimCheckLoading?: boolean;
     isTier1?: boolean;
 }
 
@@ -47,6 +54,8 @@ const statusConfig: Record<string, { label: string; color: string; bg: string }>
     HOT_LEAD: { label: '🔥 HOT LEAD', color: 'text-red-400', bg: 'bg-red-500/10 border-red-500/20' },
     low_value: { label: 'Low Value', color: 'text-gray-400', bg: 'bg-gray-500/10 border-gray-500/20' },
     new: { label: 'New', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
+    no_response: { label: 'No Response', color: 'text-gray-400', bg: 'bg-gray-500/10 border-gray-500/20' },
+    opted_out: { label: 'Opted Out', color: 'text-red-300', bg: 'bg-red-500/5 border-red-500/10' },
 };
 
 function formatDate(dateStr: string | null): string {
@@ -72,11 +81,14 @@ export function LeadCard({
     onToggleMemo,
     onLaunchOutreach,
     onQualify,
+    onCheckClaim,
+    isClaimCheckLoading = false,
     isTier1 = false,
 }: LeadCardProps) {
     const statusInfo = statusConfig[lead.status] || statusConfig.new;
     const canLaunchOutreach = ['qualified', 'needs_review'].includes(lead.status);
     const canQualify = lead.status === 'pending_review' || lead.status === 'new';
+    const canCheckClaim = !!lead.case_number && lead.claim_status !== 'no_claim';
     const hasLiens = !!(lead.liens && (Array.isArray(lead.liens) ? (lead.liens as unknown[]).length > 0 : typeof lead.liens === 'object' && Object.keys(lead.liens as Record<string, unknown>).length > 0));
 
     return (
@@ -127,24 +139,62 @@ export function LeadCard({
                     <DetailItem label="Email" value={lead.email} />
                 </div>
 
-                {/* ── Warnings ────────────────────────────────── */}
-                {(hasLiens || lead.waiting_period_end) && (
-                    <div className="flex flex-wrap gap-2 mb-4">
-                        {hasLiens && (
-                            <span className="px-2 py-1 rounded-md bg-orange-500/10 border border-orange-500/20 text-[10px] font-medium text-orange-400">
-                                ⚠️ Has Liens
-                            </span>
-                        )}
-                        {lead.waiting_period_end && new Date(lead.waiting_period_end) > new Date() && (
-                            <span className="px-2 py-1 rounded-md bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-medium text-yellow-400">
-                                🕐 Waiting Period: {lead.waiting_period_end}
-                            </span>
-                        )}
-                    </div>
-                )}
+                {/* ── Warnings & Status Badges ─────────────────── */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {hasLiens && (
+                        <span className="px-2 py-1 rounded-md bg-orange-500/10 border border-orange-500/20 text-[10px] font-medium text-orange-400">
+                            ⚠️ Has Liens
+                        </span>
+                    )}
+                    {lead.waiting_period_end && new Date(lead.waiting_period_end) > new Date() && (
+                        <span className="px-2 py-1 rounded-md bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-medium text-yellow-400">
+                            🕐 Waiting Period: {lead.waiting_period_end}
+                        </span>
+                    )}
+                    {/* Claim Status Badge */}
+                    {lead.claim_status === 'no_claim' && (
+                        <span className="px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-medium text-emerald-400">
+                            ✅ No Claim Filed
+                        </span>
+                    )}
+                    {lead.claim_status === 'claim_filed' && (
+                        <span className="px-2 py-1 rounded-md bg-red-500/10 border border-red-500/20 text-[10px] font-medium text-red-400">
+                            ⛔ Claim Filed
+                        </span>
+                    )}
+                    {lead.claim_status === 'partial_claim' && (
+                        <span className="px-2 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-[10px] font-medium text-amber-400">
+                            ⚠️ Partial Claim (Check Amount)
+                        </span>
+                    )}
+                    {/* Follow-Up Sequence Indicator */}
+                    {lead.sequence_active && lead.follow_up_step !== null && (
+                        <span className="px-2 py-1 rounded-md bg-violet-500/10 border border-violet-500/20 text-[10px] font-medium text-violet-400">
+                            📧 Follow-up {lead.follow_up_step}/4{lead.next_follow_up_at ? ` · Next: ${new Date(lead.next_follow_up_at).toLocaleDateString()}` : ''}
+                        </span>
+                    )}
+                    {lead.status === 'no_response' && (
+                        <span className="px-2 py-1 rounded-md bg-gray-500/10 border border-gray-500/20 text-[10px] font-medium text-gray-400">
+                            📭 Sequence Complete — No Response
+                        </span>
+                    )}
+                </div>
 
                 {/* ── Action Buttons ──────────────────────────── */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                    {canCheckClaim && onCheckClaim && (
+                        <button
+                            onClick={onCheckClaim}
+                            disabled={isClaimCheckLoading}
+                            className={`px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${isClaimCheckLoading
+                                    ? 'bg-white/5 border border-white/10 text-white/30 cursor-wait'
+                                    : 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
+                                }`}
+                        >
+                            {isClaimCheckLoading ? '⏳ Checking...' : '🔍 Check Claim'}
+                        </button>
+                    )}
+
                     {canQualify && (
                         <button
                             onClick={onQualify}
