@@ -5,6 +5,14 @@
   command = "npm run build"
   publish = "dist"
 
+# ── Serverless Function Redirects ─────────────────
+# launch-outreach uses Node.js runtime for Gmail SMTP (nodemailer)
+# IMPORTANT: Must come BEFORE the SPA catch-all redirect
+[[redirects]]
+  from = "/api/launch-outreach"
+  to = "/.netlify/functions/launch-outreach"
+  status = 200
+
 # SPA routing — redirect all paths to index.html
 [[redirects]]
   from = "/*"
@@ -31,3 +39,18 @@
   for = "/*.html"
   [headers.values]
     Cache-Control = "public, max-age=0, must-revalidate"
+
+# ── Citus-Antigravity Edge Functions ──────────────
+[[edge_functions]]
+  path = "/api/qualify-lead"
+  function = "qualify-lead"
+
+[[edge_functions]]
+  path = "/api/track-click"
+  function = "track-click"
+
+# Environment variables required (set in Netlify Dashboard):
+# SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+# GMAIL_USER, GMAIL_APP_PASSWORD
+# OPENROUTER_API_KEY, OPENROUTER_MODEL
+# SITE_URL
