@@ -45,13 +45,14 @@ interface LeadData {
 }
 
 function buildFollowUpSubject(lead: LeadData, step: number): string {
-    const caseRef = lead.case_number || lead.county ? `${lead.county} County` : "FL";
+    const firstName = (lead.owner_name || "Property Owner").split(" ")[0];
+    const caseRef = lead.case_number || (lead.county ? `${lead.county} County` : "FL");
     switch (step) {
-        case 1: return `Follow-Up: Surplus Funds — ${caseRef}`;
-        case 2: return `Action Required: Surplus Funds Claim — ${caseRef}`;
-        case 3: return `Second Notice: Unclaimed Surplus — ${caseRef}`;
-        case 4: return `Final Notice: Surplus Funds — ${caseRef}`;
-        default: return `Surplus Funds Notice — ${caseRef}`;
+        case 1: return `${firstName}, did you see our message about your surplus?`;
+        case 2: return `Action needed — surplus funds deadline approaching, ${caseRef}`;
+        case 3: return `${firstName}, would a quick phone call help? Re: unclaimed funds`;
+        case 4: return `Final notice — your surplus claim file is closing, ${firstName}`;
+        default: return `${firstName}, surplus funds may be available to you`;
     }
 }
 
@@ -60,43 +61,58 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
     const trackLink = `${siteUrl}/api/track-click?lead_id=${lead.id}&redirect=${encodeURIComponent(siteUrl + "/portal")}`;
     const fullName = lead.owner_name || "Property Owner";
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    const firstName = (lead.owner_name || "Property Owner").split(" ")[0];
 
     // Build step-specific body content
     let bodyContent = "";
 
     switch (step) {
         case 1:
+            // Day 1: Reassurance + FAQ angle
             bodyContent = `
-      <p>Dear ${fullName},</p>
-      <p>This is a brief follow-up to our previous correspondence regarding surplus funds that may be owed to you${lead.county ? ` from a property matter in <strong>${lead.county} County, Florida</strong>` : ""}.</p>
+      <p>Dear ${firstName},</p>
+      <p>I wanted to follow up on our message from yesterday about surplus funds that may belong to you${lead.county ? ` from a property matter in <strong>${lead.county} County</strong>` : ""}.</p>
       ${buildRefBox(lead)}
-      <p>We understand you may have been busy. Should you wish to review this matter, the information below will direct you to the relevant claim details.</p>`;
+      <p>You might be wondering: <em>"Is this real?"</em> — and that's a fair question. There are unfortunately many scams in this space. Here's how we're different:</p>
+      <p>• We <strong>never</strong> ask for money upfront — our fee is only collected if we recover your funds<br>
+      • All claims are prepared and filed by licensed legal counsel<br>
+      • You can verify the surplus exists through the county Clerk of Court</p>
+      <p>If you'd like to learn more, the link below will take you to your claim details.</p>`;
             break;
 
         case 2:
+            // Day 3: Process overview + urgency
             bodyContent = `
-      <p>Dear ${fullName},</p>
-      <p>Our office previously notified you of potential surplus funds that may be owed to you under Florida Statute §197.582.</p>
+      <p>Dear ${firstName},</p>
+      <p>We previously reached out about potential surplus funds in your name${lead.county ? ` in ${lead.county} County` : ""}. We wanted to give you a clearer picture of how the recovery process works:</p>
       ${buildRefBox(lead)}
-      <p>Please be advised that surplus funds held by the Clerk of Court are subject to statutory deadlines. Unclaimed proceeds may ultimately be transferred to the State of Florida as unclaimed property. We strongly encourage you to review your claim at your earliest convenience.</p>
-      <p>There remains no upfront cost to engage our services — our fee is contingent upon successful recovery.</p>`;
+      <p><strong>Here's what happens if you decide to move forward:</strong></p>
+      <p>1. You review and sign a simple agreement authorizing us to file on your behalf<br>
+      2. We handle all paperwork, court filings, and follow-up with the Clerk<br>
+      3. Once approved, your funds are disbursed directly to you</p>
+      <p>The process typically takes 60–90 days. Please be aware that under Florida law, surplus funds are subject to statutory deadlines — unclaimed proceeds may eventually be transferred to the State as unclaimed property.</p>
+      <div class="trust">✅ No upfront fees. No hidden costs. We only get paid when you do.</div>`;
             break;
 
         case 3:
+            // Day 7: Personal touch + phone call offer
             bodyContent = `
-      <p>Dear ${fullName},</p>
-      <p>This is our second notice regarding surplus funds that our office has identified in connection with your name${lead.county ? ` in ${lead.county} County` : ""}.</p>
+      <p>Dear ${firstName},</p>
+      <p>I know emails can feel impersonal, especially when it involves something as important as unclaimed funds. I wanted to reach out one more time${lead.county ? ` regarding the surplus identified in ${lead.county} County` : ""}.</p>
       ${buildRefBox(lead)}
-      <p>To date, we have not received a response to our prior correspondence. We remain available to assist you with the recovery process should you wish to pursue this claim.</p>`;
+      <p><strong>Would a quick phone call be easier?</strong> I'm happy to walk you through everything in 5 minutes — no pressure, no obligation. You can reach me directly at <a href="tel:+14079178640" style="color: #7c3aed;">(407) 917-8640</a>.</p>
+      <p>If you'd prefer to review the details online first, the link below is still active.</p>`;
             break;
 
         case 4:
+            // Day 14: Final notice — urgency
             bodyContent = `
-      <p>Dear ${fullName},</p>
-      <p>This constitutes our final notice regarding the surplus funds matter referenced below.</p>
+      <p>Dear ${firstName},</p>
+      <p>This is our final notice regarding the surplus funds matter referenced below.</p>
       ${buildRefBox(lead)}
-      <p>Our office has made multiple attempts to contact you regarding these funds. If we do not hear from you, we will close this matter in our records. Should you wish to revisit this claim in the future, you may contact our office directly.</p>
-      <p>We appreciate your time and wish you well.</p>`;
+      <p>We've reached out several times because we believe these funds may rightfully belong to you. If we don't hear back, we'll close this file in our records.</p>
+      <p>If you ever wish to revisit this claim in the future, you're welcome to contact us directly at <a href="tel:+14079178640" style="color: #7c3aed;">(407) 917-8640</a> or <a href="mailto:support@citusrecoverysolutions.com" style="color: #7c3aed;">support@citusrecoverysolutions.com</a>.</p>
+      <p>We appreciate your time and wish you all the best.</p>`;
             break;
     }
 
@@ -120,8 +136,9 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
     .ref-box td:first-child { font-weight: 600; color: #444; width: 140px; }
     .ref-box td:last-child { color: #1a1a1a; }
     .cta { text-align: center; margin: 28px 0; }
-    .cta a { background: #1a1a2e; color: #ffffff; text-decoration: none; padding: 12px 28px; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; }
-    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e2e2; font-size: 13px; }
+    .cta a { background: #1a1a2e; color: #ffffff; text-decoration: none; padding: 14px 32px; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; border-radius: 4px; }
+    .trust { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px 16px; margin: 20px 0; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; color: #166534; text-align: center; }
+    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e2e2; font-size: 13px; font-family: 'Segoe UI', Tahoma, sans-serif; }
     .signature strong { display: block; margin-bottom: 2px; }
     .footer { background: #f8f9fa; padding: 16px 32px; border-top: 1px solid #e2e2e2; font-family: 'Segoe UI', Tahoma, sans-serif; }
     .footer p { color: #888; font-size: 10px; line-height: 1.5; margin: 0; }
@@ -138,12 +155,15 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
       <p class="date">${today}</p>
       ${bodyContent}
       <div class="cta">
-        <a href="${trackLink}">Review Your Claim Details</a>
+        <a href="${trackLink}">Check If You're Eligible →</a>
       </div>
       <div class="signature">
-        <strong>Citus Recovery Solutions LLC</strong>
-        Recovery Services Department<br>
-        <a href="${siteUrl}" style="color: #7c3aed; text-decoration: none;">citusrecoverysolutions.com</a>
+        <strong>Michael Miranda</strong>
+        Recovery Specialist<br>
+        Citus Recovery Solutions LLC<br>
+        📞 <a href="tel:+14079178640" style="color: #7c3aed; text-decoration: none;">(407) 917-8640</a><br>
+        📧 <a href="mailto:support@citusrecoverysolutions.com" style="color: #7c3aed; text-decoration: none;">support@citusrecoverysolutions.com</a><br>
+        🌐 <a href="${siteUrl}" style="color: #7c3aed; text-decoration: none;">citusrecoverysolutions.com</a>
       </div>
       <p class="legal">This correspondence is intended solely for the individual(s) named above. If you are not the intended recipient, please disregard this message. To opt out of future communications, reply with "STOP." This is not legal advice and does not constitute an attorney-client relationship.</p>
     </div>

@@ -67,6 +67,7 @@ function buildEmailHTML(lead: {
     const siteUrl = process.env.SITE_URL || "https://citusrecoverysolutions.com";
     const trackLink = `${siteUrl}/api/track-click?lead_id=${lead.id}&redirect=${encodeURIComponent(siteUrl + "/portal")}`;
     const fullName = lead.owner_name || "Property Owner";
+    const firstName = fullName.split(" ")[0];
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     return `
@@ -90,8 +91,9 @@ function buildEmailHTML(lead: {
     .ref-box td:first-child { font-weight: 600; color: #444; width: 140px; }
     .ref-box td:last-child { color: #1a1a1a; }
     .cta { text-align: center; margin: 28px 0; }
-    .cta a { background: #1a1a2e; color: #ffffff; text-decoration: none; padding: 12px 28px; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; }
-    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e2e2; font-size: 13px; }
+    .cta a { background: #1a1a2e; color: #ffffff; text-decoration: none; padding: 14px 32px; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 14px; font-weight: 600; letter-spacing: 0.5px; display: inline-block; border-radius: 4px; }
+    .trust { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 12px 16px; margin: 20px 0; font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; color: #166534; text-align: center; }
+    .signature { margin-top: 28px; padding-top: 20px; border-top: 1px solid #e2e2e2; font-size: 13px; font-family: 'Segoe UI', Tahoma, sans-serif; }
     .signature strong { display: block; margin-bottom: 2px; }
     .footer { background: #f8f9fa; padding: 16px 32px; border-top: 1px solid #e2e2e2; font-family: 'Segoe UI', Tahoma, sans-serif; }
     .footer p { color: #888; font-size: 10px; line-height: 1.5; margin: 0; }
@@ -107,9 +109,11 @@ function buildEmailHTML(lead: {
     <div class="body">
       <p class="date">${today}</p>
 
-      <p>Dear ${fullName},</p>
+      <p>Dear ${firstName},</p>
 
-      <p>Our office has identified surplus funds that may be owed to you in connection with a recent property matter${lead.county ? ` in <strong>${lead.county} County, Florida</strong>` : " in the State of Florida"}. Under Florida Statute §197.582, former property owners and eligible parties are entitled to claim surplus proceeds resulting from tax deed or foreclosure sales.</p>
+      <p>We understand that property matters can be stressful, and we hope this message brings some positive news. Our team has identified surplus funds that may belong to you${lead.county ? ` from a recent property sale in <strong>${lead.county} County, Florida</strong>` : " in the State of Florida"}.</p>
+
+      <p>Under Florida Statute §197.582, former property owners are entitled to claim surplus proceeds when a property sells for more than the amount owed. Based on our research, funds have been identified in connection with your name.</p>
 
       <div class="ref-box">
         <table>
@@ -120,20 +124,25 @@ function buildEmailHTML(lead: {
         </table>
       </div>
 
-      <p>Citus Recovery Solutions assists eligible claimants in navigating the surplus funds recovery process. Our services include case research, document preparation, court filing, and claim follow-through. There is no upfront cost — our fee is contingent upon successful recovery of your funds.</p>
+      <p>Citus Recovery Solutions handles the entire recovery process — case research, document preparation, court filing, and follow-through. <strong>There is no upfront cost</strong>; our fee is contingent upon successful recovery of your funds.</p>
 
-      <p>If you believe you may be the rightful claimant, we encourage you to review the details of your potential claim at your earliest convenience.</p>
+      <div class="trust">✅ All claims are prepared and reviewed by licensed legal counsel. No upfront fees — ever.</div>
+
+      <p>Please note: surplus funds held by the Clerk of Court are subject to statutory deadlines. Unclaimed proceeds may eventually be transferred to the State. We encourage you to review your claim promptly.</p>
 
       <div class="cta">
-        <a href="${trackLink}">Review Your Claim Details</a>
+        <a href="${trackLink}">Check If You're Eligible →</a>
       </div>
 
-      <p>Should you have any questions, or if you wish to discuss this matter directly, please do not hesitate to contact our office.</p>
+      <p>If you have any questions or would prefer to discuss this over the phone, feel free to reach out directly — we're happy to walk you through the process.</p>
 
       <div class="signature">
-        <strong>Citus Recovery Solutions LLC</strong>
-        Recovery Services Department<br>
-        <a href="${siteUrl}" style="color: #7c3aed; text-decoration: none;">citusrecoverysolutions.com</a>
+        <strong>Michael Miranda</strong>
+        Recovery Specialist<br>
+        Citus Recovery Solutions LLC<br>
+        📞 <a href="tel:+14079178640" style="color: #7c3aed; text-decoration: none;">(407) 917-8640</a><br>
+        📧 <a href="mailto:support@citusrecoverysolutions.com" style="color: #7c3aed; text-decoration: none;">support@citusrecoverysolutions.com</a><br>
+        🌐 <a href="${siteUrl}" style="color: #7c3aed; text-decoration: none;">citusrecoverysolutions.com</a>
       </div>
 
       <p class="legal">This correspondence is intended solely for the individual(s) named above. If you are not the intended recipient, please disregard this message. To opt out of future communications, reply with "STOP." This is not legal advice and does not constitute an attorney-client relationship.</p>
@@ -148,14 +157,14 @@ function buildEmailHTML(lead: {
 
 // ── Email subject line ───────────────────────────────────
 function buildSubject(lead: { owner_name: string; county: string | null; case_number: string | null }): string {
-    const name = lead.owner_name || "Property Owner";
-    if (lead.case_number) {
-        return `Notice Regarding Surplus Funds — ${lead.case_number}`;
-    }
+    const firstName = (lead.owner_name || "Property Owner").split(" ")[0];
     if (lead.county) {
-        return `${name} — Surplus Funds Inquiry, ${lead.county} County`;
+        return `${firstName}, unclaimed funds from your ${lead.county} County property`;
     }
-    return `${name} — Surplus Funds Recovery Notice`;
+    if (lead.case_number) {
+        return `Funds identified in your name — Case ${lead.case_number}`;
+    }
+    return `${firstName}, surplus funds may be available to you`;
 }
 
 // ── Main handler ─────────────────────────────────────────
