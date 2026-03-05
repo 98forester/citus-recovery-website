@@ -10,7 +10,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Environment variable with fallback
-const MASTER_PASSWORD = import.meta.env.VITE_COMMAND_CENTER_PASSWORD || 'CitusRecovery2025';
+const MASTER_PASSWORD = import.meta.env.VITE_COMMAND_CENTER_PASSWORD;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if we are running on localhost/127.0.0.1

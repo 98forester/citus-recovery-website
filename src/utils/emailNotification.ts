@@ -7,10 +7,10 @@ import emailjs from '@emailjs/browser';
 // ──────────────────────────────────────────────
 
 const EMAILJS_CONFIG = {
-    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID || 'service_y10ie4a',
-    adminTemplateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID || 'template_fzhb2n2',
+    serviceId: import.meta.env.VITE_EMAILJS_SERVICE_ID,
+    adminTemplateId: import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
     claimantTemplateId: 'template_f69k4vn',
-    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY || 'X5nkuSfJFV7BM7yLZ',
+    publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
 };
 
 console.log('[EmailJS] Config loaded:', {

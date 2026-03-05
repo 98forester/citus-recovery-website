@@ -7,8 +7,8 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // Row Level Security on the database controls access.
 // ──────────────────────────────────────────────
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://bmtmzvksmpzffgxslwzp.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtdG16dmtzbXB6ZmZneHNsd3pwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI0NzM5NDcsImV4cCI6MjA4ODA0OTk0N30.z9GOSAcMCH-h8cXo4KJ2Mu-_b5PWqUeR3pNIBuS_jy4';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 console.log('[Supabase] Config loaded:', {
     url: supabaseUrl ? '✅ set' : '❌ missing',
