@@ -9,62 +9,62 @@ import nodemailer from "nodemailer";
 import { createClient } from "@supabase/supabase-js";
 
 function getTransporter() {
-    const user = process.env.GMAIL_USER;
-    const pass = process.env.GMAIL_APP_PASSWORD;
-    if (!user || !pass) throw new Error("Missing Gmail credentials");
-    return nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) throw new Error("Missing Gmail credentials");
+  return nodemailer.createTransport({ service: "gmail", auth: { user, pass } });
 }
 
 const handler: Handler = async (event) => {
-    const CORS_HEADERS = {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-    };
+  const CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
 
-    if (event.httpMethod === "OPTIONS") {
-        return { statusCode: 204, headers: CORS_HEADERS, body: "" };
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 204, headers: CORS_HEADERS, body: "" };
+  }
+
+  try {
+    const body = JSON.parse(event.body || "{}");
+    const { lead_id } = body;
+
+    if (!lead_id) {
+      return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "lead_id required" }) };
     }
 
-    try {
-        const body = JSON.parse(event.body || "{}");
-        const { lead_id } = body;
+    // ── Get lead details from Supabase ────────────────────
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!supabaseUrl || !supabaseKey) throw new Error("Missing Supabase credentials");
 
-        if (!lead_id) {
-            return { statusCode: 400, headers: CORS_HEADERS, body: JSON.stringify({ error: "lead_id required" }) };
-        }
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-        // ── Get lead details from Supabase ────────────────────
-        const supabaseUrl = process.env.SUPABASE_URL;
-        const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-        if (!supabaseUrl || !supabaseKey) throw new Error("Missing Supabase credentials");
+    const { data: lead, error } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("id", lead_id)
+      .single();
 
-        const supabase = createClient(supabaseUrl, supabaseKey);
+    if (error || !lead) {
+      console.error("[Notify] Lead not found:", error);
+      return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Lead not found" }) };
+    }
 
-        const { data: lead, error } = await supabase
-            .from("leads")
-            .select("*")
-            .eq("id", lead_id)
-            .single();
+    // ── Build alert content ───────────────────────────────
+    const ownerName = lead.owner_name || "Unknown";
+    const county = lead.county || "Unknown County";
+    const surplus = lead.surplus_amount || "N/A";
+    const phone = lead.phone || "No phone on file";
+    const email = lead.email || "No email on file";
+    const caseNum = lead.case_number || "N/A";
+    const siteUrl = process.env.SITE_URL || "https://citusrecoverysolutions.com";
+    const timestamp = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
 
-        if (error || !lead) {
-            console.error("[Notify] Lead not found:", error);
-            return { statusCode: 404, headers: CORS_HEADERS, body: JSON.stringify({ error: "Lead not found" }) };
-        }
+    const alertSubject = `🔥 HOT LEAD: ${ownerName} just clicked — CALL NOW`;
 
-        // ── Build alert content ───────────────────────────────
-        const ownerName = lead.owner_name || "Unknown";
-        const county = lead.county || "Unknown County";
-        const surplus = lead.surplus_amount || "N/A";
-        const phone = lead.phone || "No phone on file";
-        const email = lead.email || "No email on file";
-        const caseNum = lead.case_number || "N/A";
-        const siteUrl = process.env.SITE_URL || "https://citusrecoverysolutions.com";
-        const timestamp = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
-
-        const alertSubject = `🔥 HOT LEAD: ${ownerName} just clicked — CALL NOW`;
-
-        const alertHTML = `
+    const alertHTML = `
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"></head>
@@ -101,58 +101,58 @@ const handler: Handler = async (event) => {
 </body>
 </html>`;
 
-        // ── Plain text version for SMS gateways ───────────────
-        const alertText = `🔥 HOT LEAD: ${ownerName} clicked!\nPhone: ${phone}\nCounty: ${county}\nSurplus: ${surplus}\nCALL THEM NOW — ${siteUrl}/command-center`;
+    // ── Plain text version for SMS gateways ───────────────
+    const alertText = `🔥 HOT LEAD: ${ownerName} clicked!\nPhone: ${phone}\nCounty: ${county}\nSurplus: ${surplus}\nCALL THEM NOW — ${siteUrl}/command-center`;
 
-        // ── Send email alert to owner ─────────────────────────
-        const transporter = getTransporter();
-        const ownerEmail = process.env.ALERT_EMAIL || process.env.GMAIL_USER;
+    // ── Send email alert to owner ─────────────────────────
+    const transporter = getTransporter();
+    const ownerEmail = process.env.ALERT_EMAIL || "michael.miranda9875@gmail.com";
 
-        await transporter.sendMail({
-            from: `"🔥 Citus Alerts" <${process.env.GMAIL_USER}>`,
-            to: ownerEmail,
-            subject: alertSubject,
-            html: alertHTML,
-            text: alertText,
-        });
+    await transporter.sendMail({
+      from: `"🔥 Citus Alerts" <${process.env.GMAIL_USER}>`,
+      to: ownerEmail,
+      subject: alertSubject,
+      html: alertHTML,
+      text: alertText,
+    });
 
-        console.log(`[Notify] 🔥 Alert sent for ${ownerName} → ${ownerEmail}`);
+    console.log(`[Notify] 🔥 Alert sent for ${ownerName} → ${ownerEmail}`);
 
-        // ── Optional: SMS via email-to-SMS gateway ────────────
-        // Set ALERT_SMS in Netlify env vars (e.g., 5551234567@tmomail.net for T-Mobile)
-        // Carrier gateways: T-Mobile=@tmomail.net, AT&T=@txt.att.net, Verizon=@vtext.com
-        const smsGateway = process.env.ALERT_SMS;
-        if (smsGateway) {
-            await transporter.sendMail({
-                from: `"Citus" <${process.env.GMAIL_USER}>`,
-                to: smsGateway,
-                subject: "",
-                text: alertText,
-            });
-            console.log(`[Notify] 📱 SMS alert sent → ${smsGateway}`);
-        }
-
-        // ── Log the alert ─────────────────────────────────────
-        await supabase.from("lead_activity_logs").insert({
-            lead_id: lead_id,
-            action: "hot_lead_alert_sent",
-            details: { email: ownerEmail, sms: smsGateway || "not configured" },
-            performed_by: "system",
-        });
-
-        return {
-            statusCode: 200,
-            headers: CORS_HEADERS,
-            body: JSON.stringify({ success: true, alerted: ownerEmail }),
-        };
-    } catch (err) {
-        console.error("[Notify] Error:", err);
-        return {
-            statusCode: 500,
-            headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-            body: JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
-        };
+    // ── Optional: SMS via email-to-SMS gateway ────────────
+    // Set ALERT_SMS in Netlify env vars (e.g., 5551234567@tmomail.net for T-Mobile)
+    // Carrier gateways: T-Mobile=@tmomail.net, AT&T=@txt.att.net, Verizon=@vtext.com
+    const smsGateway = process.env.ALERT_SMS;
+    if (smsGateway) {
+      await transporter.sendMail({
+        from: `"Citus" <${process.env.GMAIL_USER}>`,
+        to: smsGateway,
+        subject: "",
+        text: alertText,
+      });
+      console.log(`[Notify] 📱 SMS alert sent → ${smsGateway}`);
     }
+
+    // ── Log the alert ─────────────────────────────────────
+    await supabase.from("lead_activity_logs").insert({
+      lead_id: lead_id,
+      action: "hot_lead_alert_sent",
+      details: { email: ownerEmail, sms: smsGateway || "not configured" },
+      performed_by: "system",
+    });
+
+    return {
+      statusCode: 200,
+      headers: CORS_HEADERS,
+      body: JSON.stringify({ success: true, alerted: ownerEmail }),
+    };
+  } catch (err) {
+    console.error("[Notify] Error:", err);
+    return {
+      statusCode: 500,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      body: JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
+    };
+  }
 };
 
 export { handler };
