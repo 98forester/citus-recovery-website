@@ -3,6 +3,7 @@ import { supabase } from '../utils/supabaseClient';
 import { StatsBar } from '../components/command-center/StatsBar';
 import { LeadFilters } from '../components/command-center/LeadFilters';
 import { LeadCard } from '../components/command-center/LeadCard';
+import { CallList } from '../components/command-center/CallList';
 
 // ════════════════════════════════════════════════════════════════
 // Command Center — Citus-Antigravity HITL Dashboard
@@ -42,10 +43,12 @@ interface Lead {
 
 type FilterStatus = 'all' | 'pending_review' | 'qualified' | 'needs_review' | 'outreach_sent' | 'HOT_LEAD' | 'low_value';
 type FilterTier = 'all' | 'tier_1_priority' | 'qualified' | 'standard';
+type ActiveTab = 'pipeline' | 'call_list';
 
 export function CommandCenter() {
     const [leads, setLeads] = useState<Lead[]>([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState<ActiveTab>('pipeline');
     const [filterStatus, setFilterStatus] = useState<FilterStatus>('all');
     const [filterTier, setFilterTier] = useState<FilterTier>('all');
     const [searchQuery, setSearchQuery] = useState('');
@@ -298,93 +301,130 @@ export function CommandCenter() {
                 {/* ── Stats Bar ─────────────────────────────────── */}
                 <StatsBar stats={stats} />
 
-                {/* ── Filters ───────────────────────────────────── */}
-                <LeadFilters
-                    filterStatus={filterStatus}
-                    filterTier={filterTier}
-                    searchQuery={searchQuery}
-                    onStatusChange={setFilterStatus}
-                    onTierChange={setFilterTier}
-                    onSearchChange={setSearchQuery}
-                />
+                {/* ── Tab Switcher ──────────────────────────────── */}
+                <div className="flex items-center gap-1 bg-white/[0.03] rounded-xl p-1 border border-white/5 w-fit">
+                    <button
+                        onClick={() => setActiveTab('pipeline')}
+                        className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'pipeline'
+                                ? 'bg-white/10 text-white shadow-sm'
+                                : 'text-white/40 hover:text-white/60'
+                            }`}
+                    >
+                        📋 Pipeline
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('call_list')}
+                        className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'call_list'
+                                ? 'bg-red-500/15 text-red-400 shadow-sm border border-red-500/20'
+                                : 'text-white/40 hover:text-white/60'
+                            }`}
+                    >
+                        🔥 Call List
+                        {leads.filter(l => l.status === 'HOT_LEAD' && !(l as any).contacted_at).length > 0 && (
+                            <span className="px-1.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold min-w-[18px] text-center animate-pulse">
+                                {leads.filter(l => l.status === 'HOT_LEAD' && !(l as any).contacted_at).length}
+                            </span>
+                        )}
+                    </button>
+                </div>
 
-                {/* ── Lead List ─────────────────────────────────── */}
-                {loading ? (
-                    <div className="flex items-center justify-center py-32">
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="w-12 h-12 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
-                            <p className="text-white/40 text-sm">Loading pipeline data...</p>
-                        </div>
-                    </div>
-                ) : filteredLeads.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-32 text-center">
-                        <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl mb-4">📭</div>
-                        <h3 className="text-lg font-medium text-white/60">No leads found</h3>
-                        <p className="text-sm text-white/30 mt-1">Adjust your filters or wait for Gravity Claw to find new leads.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {/* Tier 1 Priority Section */}
-                        {filteredLeads.some((l) => l.tier === 'tier_1_priority') && (
-                            <div className="mb-8">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-lg">🔥</span>
-                                    <h2 className="text-sm font-bold uppercase tracking-widest text-amber-400">
-                                        Tier 1 Priority Queue
-                                    </h2>
-                                    <div className="flex-1 h-px bg-gradient-to-r from-amber-500/30 to-transparent" />
-                                </div>
-                                <div className="grid gap-4">
-                                    {filteredLeads
-                                        .filter((l) => l.tier === 'tier_1_priority')
-                                        .map((lead) => (
-                                            <LeadCard
-                                                key={lead.id}
-                                                lead={lead}
-                                                isExpanded={expandedMemo === lead.id}
-                                                isOutreachLoading={outreachLoading === lead.id}
-                                                isClaimCheckLoading={claimCheckLoading === lead.id}
-                                                onToggleMemo={() => setExpandedMemo(expandedMemo === lead.id ? null : lead.id)}
-                                                onLaunchOutreach={() => handleLaunchOutreach(lead.id)}
-                                                onQualify={() => handleQualifyLead(lead.id)}
-                                                onCheckClaim={() => handleCheckClaim(lead)}
-                                                isTier1
-                                            />
-                                        ))}
+                {/* ── Call List Tab ─────────────────────────────── */}
+                {activeTab === 'call_list' && (
+                    <CallList leads={leads as any} onRefresh={fetchLeads} />
+                )}
+
+                {/* ── Pipeline Tab ─────────────────────────────── */}
+                {activeTab === 'pipeline' && (
+                    <>
+                        {/* ── Filters ───────────────────────────────────── */}
+                        <LeadFilters
+                            filterStatus={filterStatus}
+                            filterTier={filterTier}
+                            searchQuery={searchQuery}
+                            onStatusChange={setFilterStatus}
+                            onTierChange={setFilterTier}
+                            onSearchChange={setSearchQuery}
+                        />
+
+                        {/* ── Lead List ─────────────────────────────────── */}
+                        {loading ? (
+                            <div className="flex items-center justify-center py-32">
+                                <div className="flex flex-col items-center gap-4">
+                                    <div className="w-12 h-12 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+                                    <p className="text-white/40 text-sm">Loading pipeline data...</p>
                                 </div>
                             </div>
-                        )}
+                        ) : filteredLeads.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-32 text-center">
+                                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-3xl mb-4">📭</div>
+                                <h3 className="text-lg font-medium text-white/60">No leads found</h3>
+                                <p className="text-sm text-white/30 mt-1">Adjust your filters or wait for Gravity Claw to find new leads.</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-4">
+                                {/* Tier 1 Priority Section */}
+                                {filteredLeads.some((l) => l.tier === 'tier_1_priority') && (
+                                    <div className="mb-8">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span className="text-lg">🔥</span>
+                                            <h2 className="text-sm font-bold uppercase tracking-widest text-amber-400">
+                                                Tier 1 Priority Queue
+                                            </h2>
+                                            <div className="flex-1 h-px bg-gradient-to-r from-amber-500/30 to-transparent" />
+                                        </div>
+                                        <div className="grid gap-4">
+                                            {filteredLeads
+                                                .filter((l) => l.tier === 'tier_1_priority')
+                                                .map((lead) => (
+                                                    <LeadCard
+                                                        key={lead.id}
+                                                        lead={lead}
+                                                        isExpanded={expandedMemo === lead.id}
+                                                        isOutreachLoading={outreachLoading === lead.id}
+                                                        isClaimCheckLoading={claimCheckLoading === lead.id}
+                                                        onToggleMemo={() => setExpandedMemo(expandedMemo === lead.id ? null : lead.id)}
+                                                        onLaunchOutreach={() => handleLaunchOutreach(lead.id)}
+                                                        onQualify={() => handleQualifyLead(lead.id)}
+                                                        onCheckClaim={() => handleCheckClaim(lead)}
+                                                        isTier1
+                                                    />
+                                                ))}
+                                        </div>
+                                    </div>
+                                )}
 
-                        {/* Standard Leads */}
-                        {filteredLeads.some((l) => l.tier !== 'tier_1_priority') && (
-                            <div>
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-lg">📋</span>
-                                    <h2 className="text-sm font-bold uppercase tracking-widest text-white/40">
-                                        All Leads
-                                    </h2>
-                                    <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
-                                </div>
-                                <div className="grid gap-3">
-                                    {filteredLeads
-                                        .filter((l) => l.tier !== 'tier_1_priority')
-                                        .map((lead) => (
-                                            <LeadCard
-                                                key={lead.id}
-                                                lead={lead}
-                                                isExpanded={expandedMemo === lead.id}
-                                                isOutreachLoading={outreachLoading === lead.id}
-                                                isClaimCheckLoading={claimCheckLoading === lead.id}
-                                                onToggleMemo={() => setExpandedMemo(expandedMemo === lead.id ? null : lead.id)}
-                                                onLaunchOutreach={() => handleLaunchOutreach(lead.id)}
-                                                onQualify={() => handleQualifyLead(lead.id)}
-                                                onCheckClaim={() => handleCheckClaim(lead)}
-                                            />
-                                        ))}
-                                </div>
+                                {/* Standard Leads */}
+                                {filteredLeads.some((l) => l.tier !== 'tier_1_priority') && (
+                                    <div>
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <span className="text-lg">📋</span>
+                                            <h2 className="text-sm font-bold uppercase tracking-widest text-white/40">
+                                                All Leads
+                                            </h2>
+                                            <div className="flex-1 h-px bg-gradient-to-r from-white/10 to-transparent" />
+                                        </div>
+                                        <div className="grid gap-3">
+                                            {filteredLeads
+                                                .filter((l) => l.tier !== 'tier_1_priority')
+                                                .map((lead) => (
+                                                    <LeadCard
+                                                        key={lead.id}
+                                                        lead={lead}
+                                                        isExpanded={expandedMemo === lead.id}
+                                                        isOutreachLoading={outreachLoading === lead.id}
+                                                        isClaimCheckLoading={claimCheckLoading === lead.id}
+                                                        onToggleMemo={() => setExpandedMemo(expandedMemo === lead.id ? null : lead.id)}
+                                                        onLaunchOutreach={() => handleLaunchOutreach(lead.id)}
+                                                        onQualify={() => handleQualifyLead(lead.id)}
+                                                        onCheckClaim={() => handleCheckClaim(lead)}
+                                                    />
+                                                ))}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
-                    </div>
+                    </>
                 )}
             </main>
 

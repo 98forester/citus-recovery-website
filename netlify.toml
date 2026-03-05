@@ -17,6 +17,11 @@
   to = "/.netlify/functions/check-claim"
   status = 200
 
+[[redirects]]
+  from = "/api/notify-hot-lead"
+  to = "/.netlify/functions/notify-hot-lead"
+  status = 200
+
 # SPA routing — redirect all paths to index.html
 [[redirects]]
   from = "/*"

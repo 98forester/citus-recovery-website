@@ -91,6 +91,18 @@ export default async function handler(request: Request) {
             performed_by: "system",
         });
 
+        // ── Fire instant alert to owner (fire-and-forget) ────
+        const siteUrl = Deno.env.get("SITE_URL") || "https://citusrecoverysolutions.com";
+        try {
+            fetch(`${siteUrl}/.netlify/functions/notify-hot-lead`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ lead_id: leadId }),
+            }).catch(() => { }); // Don't block redirect if alert fails
+        } catch {
+            // Silently fail — redirect is more important
+        }
+
         // ── Redirect to the website ──────────────────────────────
         // In production, this would redirect to a lead-specific landing page
         return new Response(null, {
