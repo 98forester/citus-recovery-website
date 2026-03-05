@@ -116,34 +116,58 @@ const handler: Handler = async (event) => {
       text: alertText,
     });
 
-    console.log(`[Notify] 🔥 Alert sent for ${ownerName} → ${ownerEmail}`);
+    console.log(`[Notify] 🔥 Email alert sent for ${ownerName} → ${ownerEmail}`);
 
-    // ── Optional: SMS via email-to-SMS gateway ────────────
-    // Set ALERT_SMS in Netlify env vars (e.g., 5551234567@tmomail.net for T-Mobile)
-    // Carrier gateways: T-Mobile=@tmomail.net, AT&T=@txt.att.net, Verizon=@vtext.com
-    const smsGateway = process.env.ALERT_SMS;
-    if (smsGateway) {
-      await transporter.sendMail({
-        from: `"Citus" <${process.env.GMAIL_USER}>`,
-        to: smsGateway,
-        subject: "",
-        text: alertText,
+    // ── Telegram alert via Citus1Bot ──────────────────────
+    const telegramToken = process.env.TELEGRAM_BOT_TOKEN || "8633603863:AAGXL9Rh9sCVd39A_2M37E91Khg89VYU3cU";
+    const telegramChatId = process.env.TELEGRAM_CHAT_ID || "5440276285";
+
+    const telegramMessage = [
+      `🔥 <b>HOT LEAD ALERT</b>`,
+      ``,
+      `<b>${ownerName}</b> just clicked the email link!`,
+      ``,
+      `📞 Phone: <b>${phone}</b>`,
+      `📧 Email: ${email}`,
+      `🏛️ County: ${county}`,
+      `📋 Case: ${caseNum}`,
+      `💰 Surplus: <b>${surplus}</b>`,
+      ``,
+      `⚡ <b>CALL WITHIN 5 MINUTES</b>`,
+      ``,
+      `🕐 ${timestamp} ET`,
+    ].join("\n");
+
+    let telegramSent = false;
+    try {
+      const tgRes = await fetch(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: telegramChatId,
+          text: telegramMessage,
+          parse_mode: "HTML",
+        }),
       });
-      console.log(`[Notify] 📱 SMS alert sent → ${smsGateway}`);
+      const tgData = await tgRes.json();
+      telegramSent = tgData.ok === true;
+      console.log(`[Notify] 📱 Telegram alert ${telegramSent ? "sent" : "failed"}`);
+    } catch (tgErr) {
+      console.error("[Notify] Telegram error:", tgErr);
     }
 
     // ── Log the alert ─────────────────────────────────────
     await supabase.from("lead_activity_logs").insert({
       lead_id: lead_id,
       action: "hot_lead_alert_sent",
-      details: { email: ownerEmail, sms: smsGateway || "not configured" },
+      details: { email: ownerEmail, telegram: telegramSent ? telegramChatId : "failed" },
       performed_by: "system",
     });
 
     return {
       statusCode: 200,
       headers: CORS_HEADERS,
-      body: JSON.stringify({ success: true, alerted: ownerEmail }),
+      body: JSON.stringify({ success: true, alerted: ownerEmail, telegram: telegramSent }),
     };
   } catch (err) {
     console.error("[Notify] Error:", err);
