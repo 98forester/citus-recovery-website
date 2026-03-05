@@ -56,6 +56,7 @@ export function CommandCenter() {
     const [outreachLoading, setOutreachLoading] = useState<string | null>(null);
     const [claimCheckLoading, setClaimCheckLoading] = useState<string | null>(null);
     const [expandedMemo, setExpandedMemo] = useState<string | null>(null);
+    const [importStatus, setImportStatus] = useState<string | null>(null);
 
     // ── Fetch leads ────────────────────────────────────────────
     const fetchLeads = useCallback(async () => {
@@ -189,6 +190,105 @@ export function CommandCenter() {
         }
     };
 
+    // ── Import CSV ────────────────────────────────────────────
+    const handleImportCSV = async (file: File) => {
+        setImportStatus('⏳ Importing...');
+        try {
+            const text = await file.text();
+            // Simple CSV parser: split by newlines, then by commas
+            const lines = text.split(/\r?\n/).filter(l => l.trim());
+            if (lines.length < 2) {
+                setImportStatus('❌ CSV needs a header row + at least one data row');
+                return;
+            }
+
+            // Parse header
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/[\s/]+/g, '_'));
+
+            // Map common CSV column names to our database fields
+            const FIELD_MAP: Record<string, string> = {
+                'owner_name': 'owner_name', 'name': 'owner_name', 'full_name': 'owner_name', 'contact_name': 'owner_name',
+                'email': 'email', 'email_address': 'email',
+                'phone': 'phone', 'phone_number': 'phone', 'phone_1': 'phone', 'cell': 'phone', 'mobile': 'phone',
+                'property_address': 'property_address', 'address': 'property_address', 'prop_address': 'property_address',
+                'county': 'county',
+                'surplus_amount': 'surplus_amount', 'surplus': 'surplus_amount', 'amount': 'surplus_amount',
+                'case_number': 'case_number', 'case_no': 'case_number', 'case': 'case_number', 'case_#': 'case_number',
+                'case_type': 'case_type', 'type': 'case_type',
+                'mailing_address': 'mailing_address', 'mail_address': 'mailing_address',
+                'notes': 'notes', 'note': 'notes',
+                'state': 'state',
+            };
+
+            // Map header indices to db fields
+            const fieldIndices: { index: number; field: string }[] = [];
+            headers.forEach((h, i) => {
+                const mapped = FIELD_MAP[h];
+                if (mapped) fieldIndices.push({ index: i, field: mapped });
+            });
+
+            if (fieldIndices.length === 0) {
+                setImportStatus(`❌ No recognized columns found. Expected: owner_name, email, phone, county, case_number, etc. Found: ${headers.join(', ')}`);
+                return;
+            }
+
+            // Parse rows
+            const leads: Record<string, unknown>[] = [];
+            for (let i = 1; i < lines.length; i++) {
+                // Handle quoted CSV fields
+                const fields: string[] = [];
+                let current = '';
+                let inQuotes = false;
+                for (const char of lines[i]) {
+                    if (char === '"') { inQuotes = !inQuotes; continue; }
+                    if (char === ',' && !inQuotes) { fields.push(current.trim()); current = ''; continue; }
+                    current += char;
+                }
+                fields.push(current.trim());
+
+                const lead: Record<string, unknown> = {};
+                for (const { index, field } of fieldIndices) {
+                    if (fields[index] && fields[index].trim()) {
+                        lead[field] = fields[index].trim();
+                    }
+                }
+
+                // Parse surplus_amount_numeric if surplus_amount exists
+                if (lead.surplus_amount) {
+                    const num = parseFloat(String(lead.surplus_amount).replace(/[^0-9.]/g, ''));
+                    if (!isNaN(num)) lead.surplus_amount_numeric = num;
+                }
+
+                if (lead.owner_name) leads.push(lead);
+            }
+
+            if (leads.length === 0) {
+                setImportStatus('❌ No valid rows found (each row needs at least owner_name)');
+                return;
+            }
+
+            setImportStatus(`⏳ Importing ${leads.length} leads with dedup...`);
+
+            // Send to the import-leads function
+            const resp = await fetch('/.netlify/functions/import-leads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ leads }),
+            });
+            const result = await resp.json();
+
+            if (resp.ok) {
+                setImportStatus(`✅ ${result.message}`);
+                fetchLeads(); // Refresh the list
+                setTimeout(() => setImportStatus(null), 8000);
+            } else {
+                setImportStatus(`❌ ${result.error || 'Import failed'}`);
+            }
+        } catch (err) {
+            setImportStatus(`❌ ${err instanceof Error ? err.message : 'Import failed'}`);
+        }
+    };
+
     // ── Export CSV for Excess Elite ───────────────────────────
     const handleExportCSV = () => {
         if (filteredLeads.length === 0) {
@@ -288,6 +388,19 @@ export function CommandCenter() {
                         >
                             📤 Export for Excess Elite
                         </button>
+                        <label className="px-4 py-2 rounded-lg bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 text-sm text-violet-400 transition-all duration-200 hover:border-violet-500/30 cursor-pointer">
+                            📥 Import CSV
+                            <input
+                                type="file"
+                                accept=".csv"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) handleImportCSV(file);
+                                    e.target.value = ''; // Reset for re-upload
+                                }}
+                            />
+                        </label>
                         <button
                             onClick={fetchLeads}
                             className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm transition-all duration-200 hover:border-white/20"
@@ -295,6 +408,14 @@ export function CommandCenter() {
                             ↻ Refresh
                         </button>
                     </div>
+                    {importStatus && (
+                        <div className={`mt-2 text-right text-xs font-medium ${importStatus.startsWith('✅') ? 'text-emerald-400' :
+                                importStatus.startsWith('❌') ? 'text-red-400' :
+                                    'text-amber-400'
+                            }`}>
+                            {importStatus}
+                        </div>
+                    )}
                 </div>
             </header>
 
