@@ -176,6 +176,29 @@ function getNextFollowUpTime(outreachSentAt: string, nextStep: number): Date | n
     return nextDate;
 }
 
+// ── Business hours check (Eastern Time) ─────────────────
+function isBusinessHours(): { ok: boolean; reason: string } {
+    // Get current time in Eastern Time (America/New_York handles EST/EDT automatically)
+    const now = new Date();
+    const etString = now.toLocaleString("en-US", { timeZone: "America/New_York" });
+    const et = new Date(etString);
+
+    const hour = et.getHours();     // 0-23
+    const dayOfWeek = et.getDay();  // 0=Sun, 1=Mon, ..., 6=Sat
+
+    // Block Sunday entirely
+    if (dayOfWeek === 0) {
+        return { ok: false, reason: "Sunday — no emails sent" };
+    }
+
+    // Send window: 9 AM – 6 PM Eastern (Mon–Sat)
+    if (hour < 9 || hour >= 18) {
+        return { ok: false, reason: `Outside business hours (${hour}:00 ET). Window: 9 AM – 6 PM` };
+    }
+
+    return { ok: true, reason: `Business hours OK (${hour}:00 ET, day ${dayOfWeek})` };
+}
+
 // ── Main scheduler handler ──────────────────────────────
 const handler: Handler = async () => {
     const supabase = getSupabase();
@@ -183,6 +206,17 @@ const handler: Handler = async () => {
     const now = new Date().toISOString();
 
     console.log(`[Follow-Up Scheduler] Running at ${now}`);
+
+    // ── Business hours gate ──────────────────────────────
+    const hoursCheck = isBusinessHours();
+    if (!hoursCheck.ok) {
+        console.log(`[Follow-Up Scheduler] Skipped: ${hoursCheck.reason}`);
+        return {
+            statusCode: 200,
+            body: JSON.stringify({ message: `Skipped: ${hoursCheck.reason}`, processed: 0 }),
+        };
+    }
+    console.log(`[Follow-Up Scheduler] ${hoursCheck.reason}`);
 
     // Find leads with active sequences that are due for follow-up
     const { data: dueLeads, error } = await supabase
