@@ -5,8 +5,8 @@
   command = "npm run build"
   publish = "dist"
 
-[build.processing.secrets_scan]
-  omit_keys = ["GMAIL_USER", "SUPABASE_URL", "SITE_URL", "OPENROUTER_MODEL"]
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "GMAIL_USER,SUPABASE_URL,SITE_URL,OPENROUTER_MODEL"
 
 # ── Serverless Function Redirects ─────────────────
 # IMPORTANT: Must come BEFORE the SPA catch-all redirect
