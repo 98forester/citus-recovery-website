@@ -289,17 +289,20 @@ export function CommandCenter() {
         }
     };
 
-    // ── Export CSV for Excess Elite ───────────────────────────
+    // ── Export CSV for Excess Elite (calls/texts only — we handle email) ───
     const handleExportCSV = () => {
-        if (filteredLeads.length === 0) {
-            alert('No leads to export.');
+        // Only export leads that have a phone number
+        const phoneleads = filteredLeads.filter(l => l.phone?.trim());
+        if (phoneleads.length === 0) {
+            alert('No leads with phone numbers to export.');
             return;
         }
 
         // Excess Elite CSV format: First Name, Last Name, Email, Phone 1, Phone 1 Type, Address, City, State, Zip, Tags
+        // Email left blank — Citus handles emailing; EE only does calls/texts
         const headers = ['First Name', 'Last Name', 'Email', 'Phone 1', 'Phone 1: Type', 'Address 1', 'City', 'State', 'Postal Code', 'Tags'];
 
-        const rows = filteredLeads.map((lead) => {
+        const rows = phoneleads.map((lead) => {
             const nameParts = (lead.owner_name || '').split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
@@ -308,6 +311,7 @@ export function CommandCenter() {
                 lead.county?.toLowerCase() || '',
                 lead.case_type?.toLowerCase() || 'surplus',
                 lead.tier || '',
+                'surplus-call',
             ].filter(Boolean).join(', ');
 
             // Parse address parts
@@ -316,7 +320,7 @@ export function CommandCenter() {
             return [
                 firstName,
                 lastName,
-                lead.email || '',
+                '', // Email intentionally blank — we handle emailing via Citus
                 lead.phone || '',
                 'mobile',
                 addr,
@@ -410,8 +414,8 @@ export function CommandCenter() {
                     </div>
                     {importStatus && (
                         <div className={`mt-2 text-right text-xs font-medium ${importStatus.startsWith('✅') ? 'text-emerald-400' :
-                                importStatus.startsWith('❌') ? 'text-red-400' :
-                                    'text-amber-400'
+                            importStatus.startsWith('❌') ? 'text-red-400' :
+                                'text-amber-400'
                             }`}>
                             {importStatus}
                         </div>
