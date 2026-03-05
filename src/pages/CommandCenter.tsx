@@ -4,6 +4,7 @@ import { StatsBar } from '../components/command-center/StatsBar';
 import { LeadFilters } from '../components/command-center/LeadFilters';
 import { LeadCard } from '../components/command-center/LeadCard';
 import { CallList } from '../components/command-center/CallList';
+import { PipelinePreview } from '../components/command-center/PipelinePreview';
 
 // ════════════════════════════════════════════════════════════════
 // Command Center — Citus-Antigravity HITL Dashboard
@@ -43,7 +44,7 @@ interface Lead {
 
 type FilterStatus = 'all' | 'pending_review' | 'qualified' | 'needs_review' | 'outreach_sent' | 'HOT_LEAD' | 'low_value';
 type FilterTier = 'all' | 'tier_1_priority' | 'qualified' | 'standard';
-type ActiveTab = 'pipeline' | 'call_list';
+type ActiveTab = 'pipeline' | 'call_list' | 'email_preview';
 
 export function CommandCenter() {
     const [leads, setLeads] = useState<Lead[]>([]);
@@ -306,8 +307,8 @@ export function CommandCenter() {
                     <button
                         onClick={() => setActiveTab('pipeline')}
                         className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'pipeline'
-                                ? 'bg-white/10 text-white shadow-sm'
-                                : 'text-white/40 hover:text-white/60'
+                            ? 'bg-white/10 text-white shadow-sm'
+                            : 'text-white/40 hover:text-white/60'
                             }`}
                     >
                         📋 Pipeline
@@ -315,8 +316,8 @@ export function CommandCenter() {
                     <button
                         onClick={() => setActiveTab('call_list')}
                         className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${activeTab === 'call_list'
-                                ? 'bg-red-500/15 text-red-400 shadow-sm border border-red-500/20'
-                                : 'text-white/40 hover:text-white/60'
+                            ? 'bg-red-500/15 text-red-400 shadow-sm border border-red-500/20'
+                            : 'text-white/40 hover:text-white/60'
                             }`}
                     >
                         🔥 Call List
@@ -326,11 +327,25 @@ export function CommandCenter() {
                             </span>
                         )}
                     </button>
+                    <button
+                        onClick={() => setActiveTab('email_preview')}
+                        className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'email_preview'
+                            ? 'bg-purple-500/15 text-purple-400 shadow-sm border border-purple-500/20'
+                            : 'text-white/40 hover:text-white/60'
+                            }`}
+                    >
+                        ✉️ Email Preview
+                    </button>
                 </div>
 
                 {/* ── Call List Tab ─────────────────────────────── */}
                 {activeTab === 'call_list' && (
                     <CallList leads={leads as any} onRefresh={fetchLeads} />
+                )}
+
+                {/* ── Email Preview Tab ────────────────────────── */}
+                {activeTab === 'email_preview' && (
+                    <PipelinePreview />
                 )}
 
                 {/* ── Pipeline Tab ─────────────────────────────── */}
