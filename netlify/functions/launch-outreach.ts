@@ -141,7 +141,7 @@ function buildEmailHTML(lead: {
         Recovery Specialist<br>
         Citus Recovery Solutions LLC<br>
         📞 <a href="tel:+14079178640" style="color: #7c3aed; text-decoration: none;">(407) 917-8640</a><br>
-        📧 <a href="mailto:support${'@'}citusrecoverysolutions.com" style="color: #7c3aed; text-decoration: none;">support${'@'}citusrecoverysolutions.com</a><br>
+        📧 <a href="mailto:support@citusrecoverysolutions.com" style="color: #7c3aed; text-decoration: none;">support@citusrecoverysolutions.com</a><br>
         🌐 <a href="${siteUrl}" style="color: #7c3aed; text-decoration: none;">citusrecoverysolutions.com</a>
       </div>
 

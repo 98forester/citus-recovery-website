@@ -162,7 +162,7 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
         Recovery Specialist<br>
         Citus Recovery Solutions LLC<br>
         📞 <a href="tel:+14079178640" style="color: #7c3aed; text-decoration: none;">(407) 917-8640</a><br>
-        📧 <a href="mailto:support${'@'}citusrecoverysolutions.com" style="color: #7c3aed; text-decoration: none;">support${'@'}citusrecoverysolutions.com</a><br>
+        📧 <a href="mailto:support@citusrecoverysolutions.com" style="color: #7c3aed; text-decoration: none;">support@citusrecoverysolutions.com</a><br>
         🌐 <a href="${siteUrl}" style="color: #7c3aed; text-decoration: none;">citusrecoverysolutions.com</a>
       </div>
       <p class="legal">This correspondence is intended solely for the individual(s) named above. If you are not the intended recipient, please disregard this message. To opt out of future communications, reply with "STOP." This is not legal advice and does not constitute an attorney-client relationship.</p>

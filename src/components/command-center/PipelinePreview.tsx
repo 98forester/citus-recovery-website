@@ -172,7 +172,7 @@ const steps: StepData[] = [
                     </tbody></table>
                 </div>
                 <p>We've reached out several times because we believe these funds may rightfully belong to you. If we don't hear back, we'll close this file in our records.</p>
-                <p>If you ever wish to revisit this claim in the future, you're welcome to contact us directly at <span className="text-purple-600 font-medium">(407) 917-8640</span> or <span className="text-purple-600 font-medium">{`support${'@'}citusrecoverysolutions.com`}</span>.</p>
+                <p>If you ever wish to revisit this claim in the future, you're welcome to contact us directly at <span className="text-purple-600 font-medium">(407) 917-8640</span> or <span className="text-purple-600 font-medium">{`support@citusrecoverysolutions.com`}</span>.</p>
                 <p>We appreciate your time and wish you all the best.</p>
             </>
         ),
@@ -262,7 +262,7 @@ export function PipelinePreview() {
                         <span><strong className="text-white/70">Subject:</strong> {step.subject}</span>
                     </div>
                     <div className="flex gap-6 mb-4 text-xs text-white/50">
-                        <span><strong className="text-white/70">From:</strong> Michael Miranda &lt;{`support${'@'}citusrecoverysolutions.com`}&gt;</span>
+                        <span><strong className="text-white/70">From:</strong> Michael Miranda &lt;{`support@citusrecoverysolutions.com`}&gt;</span>
                         <span><strong className="text-white/70">To:</strong> John Smith &lt;jsmith@email.com&gt;</span>
                     </div>
 
@@ -280,7 +280,7 @@ export function PipelinePreview() {
                                 <span>Recovery Specialist</span><br />
                                 <span>Citus Recovery Solutions LLC</span><br />
                                 <span>📞 <span className="text-purple-600">(407) 917-8640</span></span><br />
-                                <span>📧 <span className="text-purple-600">{`support${'@'}citusrecoverysolutions.com`}</span></span><br />
+                                <span>📧 <span className="text-purple-600">{`support@citusrecoverysolutions.com`}</span></span><br />
                                 <span>🌐 <span className="text-purple-600">citusrecoverysolutions.com</span></span>
                             </div>
                             <p className="text-[10px] text-gray-400 italic mt-4">This correspondence is intended solely for the individual(s) named above. To opt out, reply "STOP." This is not legal advice.</p>

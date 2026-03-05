@@ -6,8 +6,8 @@ import { Testimonial, ServiceStep, FAQItem, SurplusType, Stat } from './types';
 export const COMPANY = {
   phone: "(407) 917-8640",
   phoneTel: "+14079178640",
-  email: `support${'@'}citusrecoverysolutions.com`,
-  calendly: `https://${'calendly.com'}/citusrecoverysolutions/30min`,
+  email: "support@citusrecoverysolutions.com",
+  calendly: "https://calendly.com/citusrecoverysolutions/30min",
   address: "7901 4th St N, Suite 300",
   city: "St. Petersburg, FL 33702",
 };
