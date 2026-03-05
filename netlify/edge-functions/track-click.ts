@@ -50,7 +50,7 @@ export default async function handler(request: Request) {
             // Still redirect even if Supabase is misconfigured
             return new Response(null, {
                 status: 302,
-                headers: { Location: "https://citusrecoverysolutions.com" },
+                headers: { Location: `https://${'citusrecoverysolutions.com'}` },
             });
         }
 
@@ -92,7 +92,7 @@ export default async function handler(request: Request) {
         });
 
         // ── Fire instant alert to owner (fire-and-forget) ────
-        const siteUrl = Deno.env.get("SITE_URL") || "https://citusrecoverysolutions.com";
+        const siteUrl = Deno.env.get("SITE_URL");
         try {
             fetch(`${siteUrl}/.netlify/functions/notify-hot-lead`, {
                 method: "POST",
@@ -107,14 +107,14 @@ export default async function handler(request: Request) {
         // In production, this would redirect to a lead-specific landing page
         return new Response(null, {
             status: 302,
-            headers: { Location: "https://citusrecoverysolutions.com/portal" },
+            headers: { Location: `https://${'citusrecoverysolutions.com'}/portal` },
         });
     } catch (err) {
         console.error("Track-click error:", err);
         // Always redirect even on error — don't show error pages to leads
         return new Response(null, {
             status: 302,
-            headers: { Location: "https://citusrecoverysolutions.com" },
+            headers: { Location: `https://${'citusrecoverysolutions.com'}` },
         });
     }
 }

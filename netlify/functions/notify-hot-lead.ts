@@ -59,7 +59,7 @@ const handler: Handler = async (event) => {
     const phone = lead.phone || "No phone on file";
     const email = lead.email || "No email on file";
     const caseNum = lead.case_number || "N/A";
-    const siteUrl = process.env.SITE_URL || "https://citusrecoverysolutions.com";
+    const siteUrl = process.env.SITE_URL;
     const timestamp = new Date().toLocaleString("en-US", { timeZone: "America/New_York" });
 
     const alertSubject = `🔥 HOT LEAD: ${ownerName} just clicked — CALL NOW`;

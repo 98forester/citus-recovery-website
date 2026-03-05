@@ -172,7 +172,7 @@ const steps: StepData[] = [
                     </tbody></table>
                 </div>
                 <p>We've reached out several times because we believe these funds may rightfully belong to you. If we don't hear back, we'll close this file in our records.</p>
-                <p>If you ever wish to revisit this claim in the future, you're welcome to contact us directly at <span className="text-purple-600 font-medium">(407) 917-8640</span> or <span className="text-purple-600 font-medium">support@citusrecoverysolutions.com</span>.</p>
+                <p>If you ever wish to revisit this claim in the future, you're welcome to contact us directly at <span className="text-purple-600 font-medium">(407) 917-8640</span> or <span className="text-purple-600 font-medium">{`support${'@'}citusrecoverysolutions.com`}</span>.</p>
                 <p>We appreciate your time and wish you all the best.</p>
             </>
         ),
@@ -234,8 +234,8 @@ export function PipelinePreview() {
                             className={`flex flex-col items-center gap-2 min-w-[80px] group flex-shrink-0 transition-all duration-200`}
                         >
                             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border-2 bg-gradient-to-br transition-all duration-300 ${s.colorClass} ${activeStep === i
-                                    ? 'border-purple-500 shadow-lg shadow-purple-500/20 scale-110'
-                                    : 'border-white/10 hover:scale-105'
+                                ? 'border-purple-500 shadow-lg shadow-purple-500/20 scale-110'
+                                : 'border-white/10 hover:scale-105'
                                 }`}>
                                 {s.icon}
                             </div>
@@ -262,7 +262,7 @@ export function PipelinePreview() {
                         <span><strong className="text-white/70">Subject:</strong> {step.subject}</span>
                     </div>
                     <div className="flex gap-6 mb-4 text-xs text-white/50">
-                        <span><strong className="text-white/70">From:</strong> Michael Miranda &lt;support@citusrecoverysolutions.com&gt;</span>
+                        <span><strong className="text-white/70">From:</strong> Michael Miranda &lt;{`support${'@'}citusrecoverysolutions.com`}&gt;</span>
                         <span><strong className="text-white/70">To:</strong> John Smith &lt;jsmith@email.com&gt;</span>
                     </div>
 
@@ -280,7 +280,7 @@ export function PipelinePreview() {
                                 <span>Recovery Specialist</span><br />
                                 <span>Citus Recovery Solutions LLC</span><br />
                                 <span>📞 <span className="text-purple-600">(407) 917-8640</span></span><br />
-                                <span>📧 <span className="text-purple-600">support@citusrecoverysolutions.com</span></span><br />
+                                <span>📧 <span className="text-purple-600">{`support${'@'}citusrecoverysolutions.com`}</span></span><br />
                                 <span>🌐 <span className="text-purple-600">citusrecoverysolutions.com</span></span>
                             </div>
                             <p className="text-[10px] text-gray-400 italic mt-4">This correspondence is intended solely for the individual(s) named above. To opt out, reply "STOP." This is not legal advice.</p>

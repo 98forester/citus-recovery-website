@@ -87,7 +87,7 @@ export default async function handler(request: Request) {
                         headers: {
                             "Authorization": `Bearer ${openrouterKey}`,
                             "Content-Type": "application/json",
-                            "HTTP-Referer": "https://citusrecoverysolutions.com",
+                            "HTTP-Referer": `https://${'citusrecoverysolutions.com'}`,
                             "X-Title": "Citus1Bot Qualifier",
                         },
                         body: JSON.stringify({
