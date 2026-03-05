@@ -66,7 +66,6 @@ function buildEmailHTML(lead: {
 }): string {
     const siteUrl = process.env.SITE_URL || "https://citusrecoverysolutions.com";
     const trackLink = `${siteUrl}/api/track-click?lead_id=${lead.id}&redirect=${encodeURIComponent(siteUrl + "/portal")}`;
-    const surplusDisplay = lead.surplus_amount || "an undisclosed amount";
     const fullName = lead.owner_name || "Property Owner";
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
@@ -115,7 +114,7 @@ function buildEmailHTML(lead: {
       <div class="ref-box">
         <table>
           ${lead.case_number ? `<tr><td>Case Reference:</td><td>${lead.case_number}</td></tr>` : ""}
-          <tr><td>Estimated Surplus:</td><td><strong>${surplusDisplay}</strong></td></tr>
+          <tr><td>Surplus Status:</td><td><strong>Funds on file — available upon verification</strong></td></tr>
           ${lead.county ? `<tr><td>Jurisdiction:</td><td>${lead.county} County, FL</td></tr>` : ""}
           ${lead.property_address ? `<tr><td>Property Address:</td><td>${lead.property_address}</td></tr>` : ""}
         </table>

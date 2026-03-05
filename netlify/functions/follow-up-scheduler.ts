@@ -59,7 +59,6 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
     const siteUrl = process.env.SITE_URL || "https://citusrecoverysolutions.com";
     const trackLink = `${siteUrl}/api/track-click?lead_id=${lead.id}&redirect=${encodeURIComponent(siteUrl + "/portal")}`;
     const fullName = lead.owner_name || "Property Owner";
-    const surplus = lead.surplus_amount || "an undisclosed amount";
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     // Build step-specific body content
@@ -70,15 +69,15 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
             bodyContent = `
       <p>Dear ${fullName},</p>
       <p>This is a brief follow-up to our previous correspondence regarding surplus funds that may be owed to you${lead.county ? ` from a property matter in <strong>${lead.county} County, Florida</strong>` : ""}.</p>
-      ${buildRefBox(lead, surplus)}
+      ${buildRefBox(lead)}
       <p>We understand you may have been busy. Should you wish to review this matter, the information below will direct you to the relevant claim details.</p>`;
             break;
 
         case 2:
             bodyContent = `
       <p>Dear ${fullName},</p>
-      <p>Our office previously notified you of potential surplus funds in the amount of <strong>${surplus}</strong> that may be owed to you under Florida Statute §197.582.</p>
-      ${buildRefBox(lead, surplus)}
+      <p>Our office previously notified you of potential surplus funds that may be owed to you under Florida Statute §197.582.</p>
+      ${buildRefBox(lead)}
       <p>Please be advised that surplus funds held by the Clerk of Court are subject to statutory deadlines. Unclaimed proceeds may ultimately be transferred to the State of Florida as unclaimed property. We strongly encourage you to review your claim at your earliest convenience.</p>
       <p>There remains no upfront cost to engage our services — our fee is contingent upon successful recovery.</p>`;
             break;
@@ -86,8 +85,8 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
         case 3:
             bodyContent = `
       <p>Dear ${fullName},</p>
-      <p>This is our second notice regarding surplus funds of approximately <strong>${surplus}</strong> that our office has identified in connection with your name${lead.county ? ` in ${lead.county} County` : ""}.</p>
-      ${buildRefBox(lead, surplus)}
+      <p>This is our second notice regarding surplus funds that our office has identified in connection with your name${lead.county ? ` in ${lead.county} County` : ""}.</p>
+      ${buildRefBox(lead)}
       <p>To date, we have not received a response to our prior correspondence. We remain available to assist you with the recovery process should you wish to pursue this claim.</p>`;
             break;
 
@@ -95,7 +94,7 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
             bodyContent = `
       <p>Dear ${fullName},</p>
       <p>This constitutes our final notice regarding the surplus funds matter referenced below.</p>
-      ${buildRefBox(lead, surplus)}
+      ${buildRefBox(lead)}
       <p>Our office has made multiple attempts to contact you regarding these funds. If we do not hear from you, we will close this matter in our records. Should you wish to revisit this claim in the future, you may contact our office directly.</p>
       <p>We appreciate your time and wish you well.</p>`;
             break;
@@ -156,11 +155,11 @@ function buildFollowUpHTML(lead: LeadData, step: number): string {
 </html>`;
 }
 
-function buildRefBox(lead: LeadData, surplus: string): string {
+function buildRefBox(lead: LeadData): string {
     return `<div class="ref-box">
         <table>
           ${lead.case_number ? `<tr><td>Case Reference:</td><td>${lead.case_number}</td></tr>` : ""}
-          <tr><td>Estimated Surplus:</td><td><strong>${surplus}</strong></td></tr>
+          <tr><td>Surplus Status:</td><td><strong>Funds on file — available upon verification</strong></td></tr>
           ${lead.county ? `<tr><td>Jurisdiction:</td><td>${lead.county} County, FL</td></tr>` : ""}
           ${lead.property_address ? `<tr><td>Property Address:</td><td>${lead.property_address}</td></tr>` : ""}
         </table>
