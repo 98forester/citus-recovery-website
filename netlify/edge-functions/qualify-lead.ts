@@ -78,7 +78,7 @@ export default async function handler(request: Request) {
         let recoveryMemo = null;
         if (surplusNumeric >= 10000) {
             const openrouterKey = Deno.env.get("OPENROUTER_API_KEY") || "";
-            const model = Deno.env.get("OPENROUTER_MODEL") || "meta-llama/llama-3.3-70b-instruct:free";
+            const model = Deno.env.get("OPENROUTER_MODEL");
 
             if (openrouterKey) {
                 try {
