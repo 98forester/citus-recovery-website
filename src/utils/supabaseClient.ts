@@ -37,7 +37,10 @@ export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKe
 //   status TEXT DEFAULT 'new',
 //   documents TEXT[],
 //   signature_data TEXT,
-//   reference_id TEXT
+//   reference_id TEXT,
+//   dob DATE,
+//   agreement_link TEXT,
+//   lpoa_link TEXT
 // );
 //
 // -- Enable Row Level Security
@@ -64,6 +67,9 @@ export interface LeadInsert {
     documents?: string[];
     signature_data?: string;
     reference_id?: string;
+    dob?: string;
+    agreement_link?: string;
+    lpoa_link?: string;
 }
 
 export const insertLead = async (lead: LeadInsert): Promise<{ success: boolean; error?: string }> => {

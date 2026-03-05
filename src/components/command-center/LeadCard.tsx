@@ -16,7 +16,10 @@ interface Lead {
     surplus_amount: string | null;
     surplus_amount_numeric: number | null;
     case_number: string | null;
+    case_type: string | null;
+    mailing_address: string | null;
     last_known_address: string | null;
+    notes: string | null;
     source: string | null;
     status: string;
     tier: string;
@@ -32,6 +35,9 @@ interface Lead {
     follow_up_step: number | null;
     sequence_active: boolean | null;
     next_follow_up_at: string | null;
+    dob: string | null;
+    agreement_link: string | null;
+    lpoa_link: string | null;
 }
 
 interface LeadCardProps {
@@ -41,6 +47,8 @@ interface LeadCardProps {
     onToggleMemo: () => void;
     onLaunchOutreach: () => void;
     onQualify: () => void;
+    onEditLinks: (lead: Lead) => void;
+    onViewDetails: (lead: Lead) => void;
     onCheckClaim?: () => void;
     isClaimCheckLoading?: boolean;
     isTier1?: boolean;
@@ -81,6 +89,8 @@ export function LeadCard({
     onToggleMemo,
     onLaunchOutreach,
     onQualify,
+    onEditLinks,
+    onViewDetails,
     onCheckClaim,
     isClaimCheckLoading = false,
     isTier1 = false,
@@ -90,6 +100,14 @@ export function LeadCard({
     const canQualify = lead.status === 'pending_review' || lead.status === 'new';
     const canCheckClaim = !!lead.case_number && lead.claim_status !== 'no_claim';
     const hasLiens = !!(lead.liens && (Array.isArray(lead.liens) ? (lead.liens as unknown[]).length > 0 : typeof lead.liens === 'object' && Object.keys(lead.liens as Record<string, unknown>).length > 0));
+
+    const isDeceased = (lead.notes?.toLowerCase().includes('deceased') ||
+        lead.notes?.toLowerCase().includes('died') ||
+        lead.case_type?.toLowerCase().includes('deceased') ||
+        lead.owner_name?.toLowerCase().includes('est of') ||
+        lead.owner_name?.toLowerCase().includes('estate'));
+
+    const hasMultiplePhones = (lead.phone || '').split(/[,\s;/]+/).filter(p => p.trim()).length > 1;
 
     return (
         <div
@@ -105,7 +123,12 @@ export function LeadCard({
                 <div className="flex items-start justify-between gap-4 mb-4">
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-3 mb-1">
-                            <h3 className="text-base font-semibold text-white truncate">{lead.owner_name || 'Unknown'}</h3>
+                            <button
+                                onClick={() => onViewDetails(lead)}
+                                className="text-base font-semibold text-white truncate hover:text-violet-400 transition-colors text-left"
+                            >
+                                {lead.owner_name || 'Unknown'}
+                            </button>
                             {isTier1 && (
                                 <span className="px-2 py-0.5 rounded-md bg-amber-500/20 border border-amber-500/30 text-[10px] font-bold uppercase tracking-wider text-amber-400 whitespace-nowrap">
                                     🔥 Tier 1
@@ -114,6 +137,19 @@ export function LeadCard({
                             <span className={`px-2 py-0.5 rounded-md border text-[10px] font-medium uppercase tracking-wider ${statusInfo.bg} ${statusInfo.color} whitespace-nowrap`}>
                                 {statusInfo.label}
                             </span>
+                            {isDeceased && (
+                                <span className="px-2 py-0.5 rounded-md bg-slate-500/10 border border-slate-500/20 text-[10px] font-bold text-slate-400 whitespace-nowrap flex items-center gap-1">
+                                    <span>💀</span> Deceased
+                                </span>
+                            )}
+                            <button
+                                onClick={() => onEditLinks(lead)}
+                                className="p-1 px-1.5 rounded bg-white/5 border border-white/10 text-white/40 hover:text-emerald-400 hover:border-emerald-500/30 transition-all flex items-center gap-1 group"
+                                title="Edit Signature Links"
+                            >
+                                <span className="text-[10px]">🔗</span>
+                                <span className="text-[9px] font-bold opacity-0 group-hover:opacity-100 transition-opacity">LINKS</span>
+                            </button>
                         </div>
                         <p className="text-xs text-white/30">
                             {lead.case_number && <span>Case #{lead.case_number} • </span>}
@@ -136,7 +172,11 @@ export function LeadCard({
                     <DetailItem label="Property" value={lead.property_address} />
                     <DetailItem label="Mailing Address" value={lead.last_known_address} />
                     <DetailItem label="Source" value={lead.source} />
-                    <DetailItem label="Email" value={lead.email} />
+                    <DetailItem
+                        label="Phone"
+                        value={hasMultiplePhones ? '📞 Multiple Contacts' : lead.phone}
+                        className={hasMultiplePhones ? 'text-violet-400 font-bold' : ''}
+                    />
                 </div>
 
                 {/* ── Warnings & Status Badges ─────────────────── */}
@@ -187,8 +227,8 @@ export function LeadCard({
                             onClick={onCheckClaim}
                             disabled={isClaimCheckLoading}
                             className={`px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${isClaimCheckLoading
-                                    ? 'bg-white/5 border border-white/10 text-white/30 cursor-wait'
-                                    : 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
+                                ? 'bg-white/5 border border-white/10 text-white/30 cursor-wait'
+                                : 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
                                 }`}
                         >
                             {isClaimCheckLoading ? '⏳ Checking...' : '🔍 Check Claim'}
@@ -230,6 +270,28 @@ export function LeadCard({
                         </span>
                     )}
 
+                    {lead.agreement_link && (
+                        <a
+                            href={lead.agreement_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-lg bg-emerald-500 text-emerald-950 text-xs font-bold hover:bg-emerald-400 transition-all duration-200 shadow-lg shadow-emerald-500/20 flex items-center gap-2"
+                        >
+                            <span>📝</span> Sign Agreement
+                        </a>
+                    )}
+
+                    {lead.lpoa_link && (
+                        <a
+                            href={lead.lpoa_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-lg bg-emerald-500 text-emerald-950 text-xs font-bold hover:bg-emerald-400 transition-all duration-200 shadow-lg shadow-emerald-500/20 flex items-center gap-2"
+                        >
+                            <span>⚖️</span> Sign LPOA
+                        </a>
+                    )}
+
                     {lead.recovery_memo && (
                         <button
                             onClick={onToggleMemo}
@@ -257,11 +319,11 @@ export function LeadCard({
     );
 }
 
-function DetailItem({ label, value }: { label: string; value: string | null }) {
+function DetailItem({ label, value, className = '' }: { label: string; value: string | null; className?: string }) {
     return (
         <div>
             <p className="text-[10px] text-white/25 uppercase tracking-wider mb-0.5">{label}</p>
-            <p className="text-xs text-white/60 truncate">{value || '—'}</p>
+            <p className={`text-xs truncate ${className || 'text-white/60'}`}>{value || '—'}</p>
         </div>
     );
 }

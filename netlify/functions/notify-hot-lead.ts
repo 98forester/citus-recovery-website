@@ -119,8 +119,17 @@ const handler: Handler = async (event) => {
     console.log(`[Notify] 🔥 Email alert sent for ${ownerName} → ${ownerEmail}`);
 
     // ── Telegram alert via Citus1Bot ──────────────────────
-    const telegramToken = process.env.TELEGRAM_BOT_TOKEN || "8633603863:AAGXL9Rh9sCVd39A_2M37E91Khg89VYU3cU";
-    const telegramChatId = process.env.TELEGRAM_CHAT_ID || "5440276285";
+    const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+    const telegramChatId = process.env.TELEGRAM_CHAT_ID;
+
+    if (!telegramToken || !telegramChatId) {
+      console.warn("[Notify] Skipping Telegram alert: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing in env");
+      return {
+        statusCode: 200,
+        headers: CORS_HEADERS,
+        body: JSON.stringify({ success: true, alerted: ownerEmail, telegram: false, msg: "Telegram env missing" }),
+      };
+    }
 
     const telegramMessage = [
       `🔥 <b>HOT LEAD ALERT</b>`,

@@ -19,7 +19,8 @@ const ALLOWED_FIELDS = [
     "owner_name", "email", "phone", "property_address", "county",
     "surplus_amount", "case_number", "case_type", "mailing_address",
     "last_known_address", "notes", "source", "state",
-    "surplus_amount_numeric", "waiting_period_end",
+    "surplus_amount_numeric", "waiting_period_end", "dob",
+    "agreement_link", "lpoa_link",
 ] as const;
 
 /**
