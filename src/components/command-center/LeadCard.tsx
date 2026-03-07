@@ -1,57 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 // ════════════════════════════════════════════════════════════════
 // LeadCard — Premium lead card with tier badges, status pills,
 // Recovery Memo expand, and Launch Outreach button
 // ════════════════════════════════════════════════════════════════
 
-interface Lead {
-    id: string;
-    created_at: string;
-    owner_name: string;
-    email: string | null;
-    phone: string | null;
-    property_address: string | null;
-    county: string | null;
-    surplus_amount: string | null;
-    surplus_amount_numeric: number | null;
-    case_number: string | null;
-    case_type: string | null;
-    mailing_address: string | null;
-    last_known_address: string | null;
-    notes: string | null;
-    source: string | null;
-    status: string;
-    tier: string;
-    recovery_memo: string | null;
-    qualified_at: string | null;
-    outreach_sent_at: string | null;
-    state: string | null;
-    waiting_period_end: string | null;
-    liens: unknown;
-    competing_claims: unknown;
-    claim_status: string | null;
-    claim_details: Record<string, unknown> | null;
-    follow_up_step: number | null;
-    sequence_active: boolean | null;
-    next_follow_up_at: string | null;
-    dob: string | null;
-    agreement_link: string | null;
-    lpoa_link: string | null;
-}
+import { Lead } from '../../types';
+import { ALL_COUNTIES } from './CountyStrategy';
 
 interface LeadCardProps {
     lead: Lead;
     isExpanded: boolean;
     isOutreachLoading: boolean;
-    onToggleMemo: () => void;
     onLaunchOutreach: () => void;
     onQualify: () => void;
     onEditLinks: (lead: Lead) => void;
     onViewDetails: (lead: Lead) => void;
-    onCheckClaim?: () => void;
-    isClaimCheckLoading?: boolean;
     isTier1?: boolean;
+    onManualSearch?: (lead: Lead) => void;
 }
 
 const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
@@ -86,26 +52,24 @@ export function LeadCard({
     lead,
     isExpanded,
     isOutreachLoading,
-    onToggleMemo,
     onLaunchOutreach,
     onQualify,
     onEditLinks,
     onViewDetails,
-    onCheckClaim,
-    isClaimCheckLoading = false,
     isTier1 = false,
+    onManualSearch,
 }: LeadCardProps) {
     const statusInfo = statusConfig[lead.status] || statusConfig.new;
     const canLaunchOutreach = ['qualified', 'needs_review'].includes(lead.status);
     const canQualify = lead.status === 'pending_review' || lead.status === 'new';
-    const canCheckClaim = !!lead.case_number && lead.claim_status !== 'no_claim';
     const hasLiens = !!(lead.liens && (Array.isArray(lead.liens) ? (lead.liens as unknown[]).length > 0 : typeof lead.liens === 'object' && Object.keys(lead.liens as Record<string, unknown>).length > 0));
 
-    const isDeceased = (lead.notes?.toLowerCase().includes('deceased') ||
-        lead.notes?.toLowerCase().includes('died') ||
-        lead.case_type?.toLowerCase().includes('deceased') ||
-        lead.owner_name?.toLowerCase().includes('est of') ||
-        lead.owner_name?.toLowerCase().includes('estate'));
+    const isDeceased = lead.is_deceased ||
+        (lead.notes?.toLowerCase().includes('deceased') ||
+            lead.notes?.toLowerCase().includes('died') ||
+            lead.case_type?.toLowerCase().includes('deceased') ||
+            lead.owner_name?.toLowerCase().includes('est of') ||
+            lead.owner_name?.toLowerCase().includes('estate'));
 
     const hasMultiplePhones = (lead.phone || '').split(/[,\s;/]+/).filter(p => p.trim()).length > 1;
 
@@ -213,6 +177,11 @@ export function LeadCard({
                             📧 Follow-up {lead.follow_up_step}/4{lead.next_follow_up_at ? ` · Next: ${new Date(lead.next_follow_up_at).toLocaleDateString()}` : ''}
                         </span>
                     )}
+                    {lead.relatives_data && lead.relatives_data.length > 0 && (
+                        <span className="px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-[10px] font-medium text-emerald-400 flex items-center gap-1">
+                            <span>👪</span> {lead.relatives_data.length} Relatives Discovered
+                        </span>
+                    )}
                     {lead.status === 'no_response' && (
                         <span className="px-2 py-1 rounded-md bg-gray-500/10 border border-gray-500/20 text-[10px] font-medium text-gray-400">
                             📭 Sequence Complete — No Response
@@ -222,18 +191,40 @@ export function LeadCard({
 
                 {/* ── Action Buttons ──────────────────────────── */}
                 <div className="flex items-center gap-2 flex-wrap">
-                    {canCheckClaim && onCheckClaim && (
-                        <button
-                            onClick={onCheckClaim}
-                            disabled={isClaimCheckLoading}
-                            className={`px-4 py-2 rounded-lg text-xs font-medium transition-all duration-200 ${isClaimCheckLoading
-                                ? 'bg-white/5 border border-white/10 text-white/30 cursor-wait'
-                                : 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
-                                }`}
-                        >
-                            {isClaimCheckLoading ? '⏳ Checking...' : '🔍 Check Claim'}
-                        </button>
-                    )}
+                    {(() => {
+                        const normalizeName = (name: string) => name.toLowerCase().replace(/county/g, '').replace(/[^a-z]/g, '');
+                        const normalizedLeadCounty = normalizeName(lead.county || '');
+                        const countyData = lead.county ? ALL_COUNTIES.find(c => normalizeName(c.name) === normalizedLeadCounty) : null;
+
+                        const excessEliteUrl = countyData?.taxDeedUrl;
+                        const clerkRecordsUrl = countyData?.clerkUrl || (lead.county ? `https://${lead.county.toLowerCase().replace(/\s+/g, '').replace('county', '')}.realtdm.com/public/cases/list` : undefined);
+
+                        return (
+                            <>
+                                {excessEliteUrl && (
+                                    <a
+                                        href={excessEliteUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 transition-all text-xs font-bold flex items-center gap-2"
+                                    >
+                                        📄 Excess Elite
+                                    </a>
+                                )}
+                                {clerkRecordsUrl && (
+                                    <a
+                                        href={clerkRecordsUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-all text-xs font-bold flex items-center gap-2"
+                                    >
+                                        🔍 Clerk Records
+                                    </a>
+                                )}
+                            </>
+                        );
+                    })()}
+
 
                     {canQualify && (
                         <button
@@ -292,29 +283,18 @@ export function LeadCard({
                         </a>
                     )}
 
-                    {lead.recovery_memo && (
-                        <button
-                            onClick={onToggleMemo}
-                            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs font-medium text-white/50 hover:bg-white/10 hover:text-white/70 transition-all duration-200 ml-auto"
+                    {lead.other_link && (
+                        <a
+                            href={lead.other_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-4 py-2 rounded-lg bg-violet-500 text-white text-xs font-bold hover:bg-violet-400 transition-all duration-200 shadow-lg shadow-violet-500/20 flex items-center gap-2"
                         >
-                            {isExpanded ? '▲ Hide Memo' : '▼ View Recovery Memo'}
-                        </button>
+                            <span>📂</span> Supp. Docs
+                        </a>
                     )}
                 </div>
             </div>
-
-            {/* ── Expanded Recovery Memo ─────────────────────── */}
-            {isExpanded && lead.recovery_memo && (
-                <div className="border-t border-white/5 bg-white/[0.02] p-5">
-                    <div className="flex items-center gap-2 mb-3">
-                        <span className="text-sm">📋</span>
-                        <h4 className="text-xs font-bold uppercase tracking-widest text-white/40">Recovery Memo — Citus1Bot Analysis</h4>
-                    </div>
-                    <div className="text-sm text-white/70 leading-relaxed whitespace-pre-wrap font-mono bg-white/[0.02] rounded-lg p-4 border border-white/5">
-                        {lead.recovery_memo}
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

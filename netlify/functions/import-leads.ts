@@ -20,7 +20,7 @@ const ALLOWED_FIELDS = [
     "surplus_amount", "case_number", "case_type", "mailing_address",
     "last_known_address", "notes", "source", "state",
     "surplus_amount_numeric", "waiting_period_end", "dob",
-    "agreement_link", "lpoa_link",
+    "agreement_link", "lpoa_link", "relatives_data",
 ] as const;
 
 /**
@@ -56,6 +56,20 @@ function normalizePhone(phone: string): string {
  * Returns the existing lead ID if found, null otherwise.
  */
 async function findExistingLead(lead: Record<string, unknown>): Promise<string | null> {
+    const case_num = lead.case_number as string | undefined;
+    const county = lead.county as string | undefined;
+
+    // 0. Match by Case Number AND County (strongest identifier)
+    if (case_num && case_num.trim() && !case_num.toUpperCase().includes('PENDING') && county && county.trim()) {
+        const { data } = await supabase
+            .from("leads")
+            .select("id")
+            .ilike("case_number", case_num.trim())
+            .ilike("county", county.trim())
+            .limit(1);
+        if (data && data.length > 0) return data[0].id;
+    }
+
     const name = lead.owner_name as string | undefined;
     const phone = lead.phone as string | undefined;
     const email = lead.email as string | undefined;

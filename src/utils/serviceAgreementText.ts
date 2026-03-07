@@ -1,6 +1,7 @@
 export interface AgreementClientData {
     clientName: string;
     propertyAddress: string;
+    mailingAddress: string;
     county: string;
     date: string;
 }

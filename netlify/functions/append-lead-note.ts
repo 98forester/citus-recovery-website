@@ -7,12 +7,13 @@ const supabase = createClient(
 );
 
 /**
- * append-lead-note — Allows Citus 1 Bot to append notes to a lead
+ * append-lead-note — Allows external bots (Gravity Claw) to append findings to a lead's record.
  * 
  * Request Body:
  * {
  *   "lead_id": "uuid",
- *   "note": "The actual note text from the bot"
+ *   "note": "The findings text...",
+ *   "type": "finding" | "general"
  * }
  */
 export const handler: Handler = async (event: HandlerEvent) => {
@@ -21,51 +22,82 @@ export const handler: Handler = async (event: HandlerEvent) => {
     }
 
     try {
-        const { lead_id, note } = JSON.parse(event.body || "{}");
+        const body = JSON.parse(event.body || "{}");
+        const { lead_id, note, type = 'general', case_number, county } = body;
 
-        if (!lead_id || !note) {
+        if (!note) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ error: "Missing lead_id or note" }),
+                body: JSON.stringify({ error: "Missing note content" }),
             };
         }
 
-        // 1. Fetch current notes
-        const { data: lead, error: fetchError } = await supabase
-            .from("leads")
-            .select("notes, owner_name")
-            .eq("id", lead_id)
-            .single();
+        let targetLeadId = lead_id;
 
-        if (fetchError || !lead) {
+        // 1. Identification with Fallback
+        if (!targetLeadId && case_number && county) {
+            console.log(`Looking up lead by case: ${case_number} in ${county}`);
+            const { data: lead, error: fetchError } = await supabase
+                .from("leads")
+                .select("id, notes")
+                .ilike("case_number", case_number)
+                .ilike("county", county)
+                .maybeSingle();
+
+            if (fetchError) {
+                console.error("Lookup error:", fetchError);
+            } else if (lead) {
+                targetLeadId = lead.id;
+                // We'll fetch notes again or use this if targetLeadId was already set
+            }
+        }
+
+        if (!targetLeadId) {
             return {
                 statusCode: 404,
-                body: JSON.stringify({ error: "Lead not found" }),
+                body: JSON.stringify({ error: "Lead not found or identification missing" }),
             };
         }
 
-        // 2. Format new note with timestamp
-        const timestamp = new Date().toLocaleString('en-US', { timeZone: 'America/New_York' });
-        const newNoteEntry = `\n[🤖 CITUS 1 BOT - ${timestamp}]\n${note}\n${"-".repeat(20)}`;
-        const updatedNotes = (lead.notes || "") + newNoteEntry;
-
-        // 3. Update Supabase
-        const { error: updateError } = await supabase
+        // Fetch current notes for the identified lead
+        const { data: leadData, error: fetchError } = await supabase
             .from("leads")
-            .update({ notes: updatedNotes })
-            .eq("id", lead_id);
+            .select("notes")
+            .eq("id", targetLeadId)
+            .single();
 
-        if (updateError) {
-            throw updateError;
+        if (fetchError) throw fetchError;
+        const currentNotes = leadData.notes || "";
+        let updates: any = {};
+
+        if (type === 'finding') {
+            updates.notes = currentNotes ? `${currentNotes}\n\n🤖 [Bot Finding]: ${note}` : `🤖 [Bot Finding]: ${note}`;
+        } else {
+            // Append to standard notes
+            updates.notes = currentNotes ? `${currentNotes}\n\n[Bot]: ${note}` : `[Bot]: ${note}`;
         }
 
-        console.log(`Successfully appended bot note for ${lead.owner_name} (${lead_id})`);
+        // Perform the update
+        const { error: updateError } = await supabase
+            .from("leads")
+            .update(updates)
+            .eq("id", targetLeadId);
+
+        if (updateError) throw updateError;
+
+        // Log the activity
+        await supabase.from("lead_activity_logs").insert({
+            lead_id: targetLeadId,
+            action: type === 'finding' ? 'bot_finding_added' : 'bot_note_added',
+            details: { note, type },
+            performed_by: 'citus1bot',
+        });
 
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message: "Note appended successfully",
-                owner: lead.owner_name
+                type
             }),
         };
     } catch (err) {

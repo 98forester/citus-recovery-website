@@ -5,7 +5,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.98.0";
 // POST /api/qualify-lead  { lead_id: string }
 //
 // Analyzes surplus amount, property history, and liens.
-// Generates a Recovery Memo for leads >$10k.
+// Generates a Bot Finding for leads >$10k.
 // Flags >$50k as Tier 1 Priority.
 // ════════════════════════════════════════════════════════════════
 
@@ -74,25 +74,26 @@ export default async function handler(request: Request) {
             tier = "qualified";
         }
 
-        // ── Generate Recovery Memo (for >$10k) ───────────────────
-        let recoveryMemo = null;
+        // ── Generate Bot Finding (for >$10k) ───────────────────
+        let botFinding = null;
         if (surplusNumeric >= 10000) {
             const openrouterKey = Deno.env.get("OPENROUTER_API_KEY") || "";
-            const model = Deno.env.get("OPENROUTER_MODEL");
+            const model = Deno.env.get("OPENROUTER_MODEL") || "anthropic/claude-3-haiku";
 
             if (openrouterKey) {
                 try {
+                    console.log(`[Citus1Bot] Qualifying lead ${lead_id} with model ${model}`);
                     const llmResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
                         method: "POST",
                         headers: {
                             "Authorization": `Bearer ${openrouterKey}`,
                             "Content-Type": "application/json",
-                            "HTTP-Referer": `https://${'citusrecoverysolutions.com'}`,
+                            "HTTP-Referer": "https://citusrecoverysolutions.com",
                             "X-Title": "Citus1Bot Qualifier",
                         },
                         body: JSON.stringify({
                             model,
-                            max_tokens: 800,
+                            max_tokens: 1000,
                             messages: [
                                 {
                                     role: "system",
@@ -116,7 +117,6 @@ Be direct and analytical. No fluff.`,
 - State: ${lead.state || "FL"}
 - Property Address: ${lead.property_address || "Unknown"}
 - Last Known Address: ${lead.last_known_address || lead.mailing_address || "Unknown"}
-- Property History: ${JSON.stringify(lead.property_history || "No data")}
 - Known Liens: ${JSON.stringify(lead.liens || "No data")}
 - Source: ${lead.source || "Unknown"}`,
                                 },
@@ -124,14 +124,22 @@ Be direct and analytical. No fluff.`,
                         }),
                     });
 
+                    if (!llmResponse.ok) {
+                        const errorText = await llmResponse.text();
+                        console.error(`[Citus1Bot] OpenRouter Error (${llmResponse.status}):`, errorText);
+                        throw new Error(`OpenRouter returned ${llmResponse.status}`);
+                    }
+
                     const llmData = await llmResponse.json();
-                    recoveryMemo = llmData.choices?.[0]?.message?.content || "Memo generation failed — review manually.";
+                    botFinding = llmData.choices?.[0]?.message?.content || "Finding generation failed — review manually.";
+                    console.log(`[Citus1Bot] Memo generated successfully for ${lead_id}`);
                 } catch (llmErr) {
-                    console.error("LLM call failed:", llmErr);
-                    recoveryMemo = `Auto-memo failed. Manual review required. Surplus: $${surplusNumeric.toLocaleString()}, Tier: ${tier}`;
+                    console.error("[Citus1Bot] LLM call failed:", llmErr);
+                    botFinding = `Auto-finding failed: ${llmErr instanceof Error ? llmErr.message : String(llmErr)}. Manual review required. Surplus: $${surplusNumeric.toLocaleString()}, Tier: ${tier}`;
                 }
             } else {
-                recoveryMemo = `[No LLM key configured] Surplus: $${surplusNumeric.toLocaleString()}, Tier: ${tier}. Review manually.`;
+                console.warn("[Citus1Bot] Missing OPENROUTER_API_KEY");
+                botFinding = `[No LLM key configured] Surplus: $${surplusNumeric.toLocaleString()}, Tier: ${tier}. Review manually.`;
             }
         }
 
@@ -154,8 +162,10 @@ Be direct and analytical. No fluff.`,
             status: newStatus,
             qualified_at: new Date().toISOString(),
         };
-        if (recoveryMemo) {
-            updateData.recovery_memo = recoveryMemo;
+        if (botFinding) {
+            const existingNotes = lead.notes || "";
+            const newBotNote = `🤖 [Bot Finding]:\n${botFinding}`;
+            updateData.notes = [existingNotes, newBotNote].filter(Boolean).join("\n\n");
         }
 
         const { error: updateError } = await supabase
@@ -180,7 +190,7 @@ Be direct and analytical. No fluff.`,
                 status: newStatus,
                 has_liens: !!hasLiens,
                 has_competing_claims: !!hasCompetingClaims,
-                memo_generated: !!recoveryMemo,
+                finding_generated: !!botFinding,
             },
             performed_by: "citus1bot",
         });
@@ -192,7 +202,7 @@ Be direct and analytical. No fluff.`,
                 tier,
                 status: newStatus,
                 surplus_numeric: surplusNumeric,
-                memo_generated: !!recoveryMemo,
+                finding_generated: !!botFinding,
             }),
             { status: 200, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
         );

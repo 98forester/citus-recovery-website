@@ -1,14 +1,4 @@
-import {
-    Document,
-    Paragraph,
-    TextRun,
-    HeadingLevel,
-    AlignmentType,
-    ImageRun,
-    Packer,
-    BorderStyle,
-} from 'docx';
-import { saveAs } from 'file-saver';
+import { jsPDF } from 'jspdf';
 import {
     getServiceAgreementSections,
     AgreementClientData,
@@ -17,248 +7,133 @@ import {
 const COMPANY_NAME = 'Citus Recovery Solutions LLC';
 
 /**
- * Generates and downloads a signed Service Agreement as a .docx file.
+ * Generates and downloads a signed Service Agreement as a PDF file.
  */
 export const generateSignedAgreement = async (
     clientData: AgreementClientData,
     signatureDataUrl: string | null
-) => {
+): Promise<Blob> => {
     const sections = getServiceAgreementSections(clientData);
-    const children: Paragraph[] = [];
+    const doc = new jsPDF({
+        orientation: 'p',
+        unit: 'mm',
+        format: 'a4',
+    });
+
+    let y = 20;
+    const margin = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const maxWidth = pageWidth - margin * 2;
+
+    // Helper for adding multi-line text
+    const addWrappedText = (text: string, fontSize: number, isBold: boolean = false, spacing: number = 7) => {
+        doc.setFont('times', isBold ? 'bold' : 'normal');
+        doc.setFontSize(fontSize);
+        doc.setTextColor(0, 0, 0); // Always black
+
+        const lines = doc.splitTextToSize(text, maxWidth);
+        lines.forEach((line: string) => {
+            if (y > 270) {
+                doc.addPage();
+                y = 20;
+            }
+            doc.text(line, margin, y);
+            y += spacing;
+        });
+        return y;
+    };
 
     // Title
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: 'SURPLUS FUNDS SERVICES AGREEMENT',
-                    bold: true,
-                    size: 32,
-                    font: 'Times New Roman',
-                    color: '000000',
-                }),
-            ],
-            alignment: AlignmentType.CENTER,
-            spacing: { after: 300 },
-        })
-    );
+    doc.setFont('times', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text('SURPLUS FUNDS SERVICES AGREEMENT', pageWidth / 2, y, { align: 'center' });
+    y += 15;
 
     // Agreement sections
     for (const section of sections) {
         // Section heading
-        children.push(
-            new Paragraph({
-                text: section.heading,
-                heading: HeadingLevel.HEADING_2,
-                spacing: { before: 300, after: 100 },
-                run: {
-                    bold: true,
-                    size: 24,
-                    font: 'Times New Roman',
-                    color: '000000',
-                },
-            })
-        );
+        if (y > 260) {
+            doc.addPage();
+            y = 20;
+        }
+
+        doc.setFont('times', 'bold');
+        doc.setFontSize(12);
+        doc.text(section.heading, margin, y);
+        y += 7;
 
         // Section body
         if (section.body) {
-            children.push(
-                new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: section.body,
-                            size: 22,
-                            font: 'Times New Roman',
-                            color: '000000',
-                        }),
-                    ],
-                    spacing: { after: 100 },
-                })
-            );
+            addWrappedText(section.body, 10, false, 5);
+            y += 2;
         }
 
         // Bullet points
         if (section.bullets) {
             for (const bullet of section.bullets) {
-                children.push(
-                    new Paragraph({
-                        children: [
-                            new TextRun({
-                                text: bullet,
-                                size: 22,
-                                font: 'Times New Roman',
-                                color: '000000',
-                            }),
-                        ],
-                        bullet: { level: 0 },
-                        spacing: { after: 60 },
-                    })
-                );
+                addWrappedText(`• ${bullet}`, 10, false, 5);
+                y += 1;
             }
+            y += 4;
         }
     }
 
     // Signature block
-    children.push(
-        new Paragraph({
-            children: [new TextRun({ text: '' })],
-            spacing: { before: 600 },
-            border: {
-                top: {
-                    style: BorderStyle.SINGLE,
-                    size: 1,
-                    color: '999999',
-                },
-            },
-        })
-    );
-
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: 'SIGNATURES',
-                    bold: true,
-                    size: 24,
-                    font: 'Times New Roman',
-                    color: '000000',
-                }),
-            ],
-            spacing: { before: 300, after: 200 },
-        })
-    );
-
-    // Client signature
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: 'Client Signature:',
-                    bold: true,
-                    size: 22,
-                    font: 'Times New Roman',
-                    color: '000000',
-                }),
-            ],
-            spacing: { after: 100 },
-        })
-    );
-
-    // Embed the signature image if available
-    if (signatureDataUrl) {
-        try {
-            const response = await fetch(signatureDataUrl);
-            const blob = await response.blob();
-            const arrayBuffer = await blob.arrayBuffer();
-            const uint8Array = new Uint8Array(arrayBuffer);
-
-            children.push(
-                new Paragraph({
-                    children: [
-                        new ImageRun({
-                            data: uint8Array,
-                            transformation: { width: 300, height: 100 },
-                            type: 'png',
-                        }),
-                    ],
-                    spacing: { after: 100 },
-                })
-            );
-        } catch {
-            children.push(
-                new Paragraph({
-                    children: [
-                        new TextRun({
-                            text: '[Signature on file]',
-                            italics: true,
-                            size: 22,
-                            color: '000000',
-                            font: 'Times New Roman',
-                        }),
-                    ],
-                    spacing: { after: 100 },
-                })
-            );
-        }
+    if (y > 220) {
+        doc.addPage();
+        y = 20;
     }
 
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: `Print Name: ${clientData.clientName}`,
-                    size: 22,
-                    font: 'Times New Roman',
-                    color: '000000',
-                }),
-            ],
-            spacing: { after: 100 },
-        })
-    );
+    y += 10;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 15;
 
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: `Date: ${clientData.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`,
-                    size: 22,
-                    font: 'Times New Roman',
-                    color: '000000',
-                }),
-            ],
-            spacing: { after: 300 },
-        })
-    );
+    doc.setFont('times', 'bold');
+    doc.setFontSize(12);
+    doc.text('SIGNATURES', margin, y);
+    y += 10;
 
-    // Company signature block
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: `Company Representative: ${COMPANY_NAME}`,
-                    bold: true,
-                    size: 22,
-                    font: 'Times New Roman',
-                    color: '000000',
-                }),
-            ],
-            spacing: { after: 100 },
-        })
-    );
+    doc.setFont('times', 'bold');
+    doc.setFontSize(10);
+    doc.text('Client Signature:', margin, y);
+    y += 5;
 
-    children.push(
-        new Paragraph({
-            children: [
-                new TextRun({
-                    text: '___________________________',
-                    size: 22,
-                    font: 'Times New Roman',
-                    color: '000000',
-                }),
-            ],
-            spacing: { after: 100 },
-        })
-    );
+    // Embed signature
+    if (signatureDataUrl) {
+        try {
+            // Signature is already in DataURL format
+            doc.addImage(signatureDataUrl, 'PNG', margin, y, 60, 20);
+            y += 25;
+        } catch (err) {
+            console.error('Error adding signature to PDF:', err);
+            doc.setFont('times', 'italic');
+            doc.text('[Signature on file]', margin, y);
+            y += 10;
+        }
+    } else {
+        doc.line(margin, y + 5, margin + 60, y + 5);
+        y += 15;
+    }
 
-    const doc = new Document({
-        sections: [
-            {
-                properties: {
-                    page: {
-                        margin: {
-                            top: 1440,
-                            right: 1440,
-                            bottom: 1440,
-                            left: 1440,
-                        },
-                    },
-                },
-                children,
-            },
-        ],
-    });
+    doc.setFont('times', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Print Name: ${clientData.clientName}`, margin, y);
+    y += 7;
+    doc.text(`Date: ${clientData.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}`, margin, y);
+    y += 15;
 
-    const blob = await Packer.toBlob(doc);
+    doc.setFont('times', 'bold');
+    doc.text(`Company Representative: ${COMPANY_NAME}`, margin, y);
+    y += 10;
+    doc.setDrawColor(0, 0, 0);
+    doc.line(margin, y, margin + 80, y);
+
     const safeName = clientData.clientName.replace(/[^a-zA-Z0-9]/g, '_');
-    saveAs(blob, `Services_Agreement_${safeName}.docx`);
+    const fileName = `Services_Agreement_${safeName}.pdf`;
+    doc.save(fileName);
+
+    // Return blob for storage upload
+    return doc.output('blob');
 };

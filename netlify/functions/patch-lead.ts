@@ -7,15 +7,19 @@ const supabase = createClient(
 );
 
 /**
- * update-lead — A generalized endpoint to update specific fields on a lead.
+ * patch-lead — A specialized endpoint for Citus1Bot and Gravity Claw to update
+ * structured fields on a lead with fallback identification logic.
  * 
  * Request Body:
  * {
- *   "lead_id": "uuid",
+ *   "lead_id": "uuid" (optional),
+ *   "case_number": "string" (optional),
+ *   "county": "string" (optional),
  *   "updates": {
- *     "phone": "new value",
- *     "email": "new value",
- *     "notes": "new value",
+ *     "status": "qualified",
+ *     "tier": "tier_1_priority",
+ *     "is_deceased": true,
+ *     "surplus_amount_numeric": 150000,
  *     ...
  *   }
  * }
@@ -27,7 +31,14 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     try {
         const body = JSON.parse(event.body || "{}");
-        const { lead_id, updates, case_number, county } = body;
+        const { lead_id, case_number, county, updates } = body;
+
+        if (!updates || Object.keys(updates).length === 0) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: "No updates provided" }),
+            };
+        }
 
         let targetLeadId = lead_id;
 
@@ -55,7 +66,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
             };
         }
 
-        // 2. Perform the update
+        // 2. Perform Structured Update
         const { data, error: updateError } = await supabase
             .from("leads")
             .update(updates)
@@ -64,21 +75,30 @@ export const handler: Handler = async (event: HandlerEvent) => {
             .single();
 
         if (updateError) {
+            console.error("Update error:", updateError);
             throw updateError;
         }
+
+        // 3. Log Activity
+        await supabase.from("lead_activity_logs").insert({
+            lead_id: targetLeadId,
+            action: "lead_patched",
+            details: { updates },
+            performed_by: "citus1bot",
+        });
 
         return {
             statusCode: 200,
             body: JSON.stringify({
-                message: "Lead updated successfully",
+                message: "Lead patched successfully",
                 lead: data
             }),
         };
     } catch (err) {
-        console.error("Update Lead Error:", err);
+        console.error("Patch Lead Error:", err);
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: "Failed to update lead" }),
+            body: JSON.stringify({ error: "Failed to patch lead" }),
         };
     }
 };

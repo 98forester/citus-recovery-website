@@ -294,9 +294,12 @@ const handler: Handler = async () => {
             const subject = buildFollowUpSubject(lead, nextStep);
             const html = buildFollowUpHTML(lead, nextStep);
 
+            // Handle multiple emails (comma-separated)
+            const recipients = lead.email.split(',').map((e: string) => e.trim()).filter((e: string) => e.length > 0);
+
             await transporter.sendMail({
                 from: `"Citus Recovery Solutions" <${process.env.GMAIL_USER}>`,
-                to: lead.email,
+                to: recipients,
                 subject,
                 html,
             });

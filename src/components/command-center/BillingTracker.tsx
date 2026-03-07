@@ -15,12 +15,12 @@ interface Service {
 const INITIAL_SERVICES: Service[] = [
     {
         id: '1',
-        name: 'Google Pro (AI Studio)',
-        cost: 20,
+        name: 'Google Workspace (2 Accounts)',
+        cost: 16,
         billingCycle: 'monthly',
         renewalDate: 'Monthly',
-        category: 'AI / Development',
-        notes: 'Powers advanced model access and development tokens.',
+        category: 'Email / Productivity',
+        notes: 'Professional business email for outreach.',
         isEssential: true
     },
     {
@@ -73,6 +73,16 @@ const INITIAL_SERVICES: Service[] = [
         category: 'Database',
         notes: 'Currently on free tier. Monitor usage.',
         isEssential: true
+    },
+    {
+        id: '7',
+        name: 'Apify (Scraper)',
+        cost: 49,
+        billingCycle: 'monthly',
+        renewalDate: 'Optional',
+        category: 'Data / Discovery',
+        notes: 'For automated daily county-wide scraping.',
+        isEssential: false
     }
 ];
 

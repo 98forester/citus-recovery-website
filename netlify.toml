@@ -25,6 +25,21 @@
   to = "/.netlify/functions/notify-hot-lead"
   status = 200
 
+[[redirects]]
+  from = "/api/update-lead"
+  to = "/.netlify/functions/update-lead"
+  status = 200
+
+[[redirects]]
+  from = "/api/append-lead-note"
+  to = "/.netlify/functions/append-lead-note"
+  status = 200
+
+[[redirects]]
+  from = "/api/import-leads"
+  to = "/.netlify/functions/import-leads"
+  status = 200
+
 # SPA routing — redirect all paths to index.html
 [[redirects]]
   from = "/*"

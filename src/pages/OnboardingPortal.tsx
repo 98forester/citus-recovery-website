@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Shield } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Shield, Loader2 } from 'lucide-react';
 import { PortalProgress } from '../components/portal/PortalProgress';
 import { StepClientInfo, ClientInfo } from '../components/portal/StepClientInfo';
 import { StepDocuments, DocumentFiles } from '../components/portal/StepDocuments';
 import { StepReviewSign } from '../components/portal/StepReviewSign';
 import { StepConfirmation } from '../components/portal/StepConfirmation';
-import { sendNotificationEmail, sendClaimantWelcomeEmail, generateReferenceId } from '../utils/emailNotification';
-import { insertLead } from '../utils/supabaseClient';
+import { sendNotificationEmail, generateReferenceId, sendAutoReply } from '../utils/emailNotification';
+import { insertLead, getLead, updateLead, uploadFile } from '../utils/supabaseClient';
+import { generateSignedAgreement } from '../utils/generateAgreement';
 import { COMPANY } from '../constants';
 
 const INITIAL_CLIENT_INFO: ClientInfo = {
@@ -32,6 +33,7 @@ const INITIAL_DOCUMENTS: DocumentFiles = {
 };
 
 export const OnboardingPortal = () => {
+    const [searchParams] = useSearchParams();
     const [currentStep, setCurrentStep] = useState(1);
     const [clientInfo, setClientInfo] = useState<ClientInfo>(INITIAL_CLIENT_INFO);
     const [documents, setDocuments] = useState<DocumentFiles>(INITIAL_DOCUMENTS);
@@ -39,25 +41,109 @@ export const OnboardingPortal = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [referenceId, setReferenceId] = useState('');
     const [submitError, setSubmitError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [existingLeadId, setExistingLeadId] = useState<string | null>(null);
+
+    // ── Hydrate Existing Lead ──────────────────────────────────
+    useEffect(() => {
+        const refId = searchParams.get('ref') || searchParams.get('id');
+        if (refId) {
+            const hydrate = async () => {
+                setIsLoading(true);
+                const { data: lead, error } = await getLead(refId);
+                if (lead) {
+                    setExistingLeadId(lead.id);
+                    setReferenceId(lead.reference_id || '');
+
+                    // Split owner name
+                    const names = (lead.owner_name || '').split(' ');
+                    const firstName = names[0] || '';
+                    const lastName = names.slice(1).join(' ') || '';
+
+                    setClientInfo({
+                        firstName,
+                        lastName,
+                        email: lead.email || '',
+                        phone: lead.phone || '',
+                        streetAddress: lead.mailing_address || '',
+                        city: '',
+                        state: 'FL',
+                        zip: '',
+                        propertyAddress: lead.property_address || '',
+                        county: lead.county || '',
+                        caseType: lead.case_type || 'tax_deed',
+                        notes: lead.notes || '',
+                    });
+
+                    // If we have enough info, skip to review
+                    if (lead.owner_name && lead.property_address) {
+                        setCurrentStep(3);
+                    }
+                } else if (error) {
+                    console.error('Portal hydration error:', error);
+                }
+                setIsLoading(false);
+            };
+            hydrate();
+        }
+    }, [searchParams]);
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
         setSubmitError(null);
 
-        const refId = generateReferenceId();
-        setReferenceId(refId);
+        const refId = existingLeadId ? referenceId : generateReferenceId();
+        if (!existingLeadId) setReferenceId(refId);
 
         // Collect document names
         const docNames: string[] = [];
         if (documents.driversLicense.length > 0) docNames.push("Driver's License");
         documents.additionalDocs.forEach((f) => docNames.push(f.name));
 
-        const mailingAddress = `${clientInfo.streetAddress}, ${clientInfo.city}, ${clientInfo.state} ${clientInfo.zip}`;
+        const mailingAddress = `${clientInfo.streetAddress}${clientInfo.city ? `, ${clientInfo.city}` : ''}${clientInfo.state ? `, ${clientInfo.state}` : ''}${clientInfo.zip ? ` ${clientInfo.zip}` : ''}`;
 
         try {
-            // Save to Supabase
-            console.log('📤 Submitting lead to Supabase...');
-            const { success, error: dbError } = await insertLead({
+            // 1. Upload Documents to Supabase Storage
+            const uploadedUrls: string[] = [];
+            const timestamp = Date.now();
+
+            // Upload Driver's License
+            for (const file of documents.driversLicense) {
+                const path = `${refId}/id_${timestamp}_${file.name}`;
+                const { url, error } = await uploadFile('client-documents', path, file);
+                if (url) uploadedUrls.push(url);
+                else console.error('ID upload failed:', error);
+            }
+
+            // Upload Additional Docs
+            for (const file of documents.additionalDocs) {
+                const path = `${refId}/doc_${timestamp}_${file.name}`;
+                const { url, error } = await uploadFile('client-documents', path, file);
+                if (url) uploadedUrls.push(url);
+                else console.error('Doc upload failed:', error);
+            }
+
+            // 2. Generate and Upload Signed Agreement PDF
+            let agreementUrl: string | undefined;
+            let agreementBlob: Blob | undefined;
+
+            if (signature) {
+                agreementBlob = await generateSignedAgreement({
+                    clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
+                    propertyAddress: clientInfo.propertyAddress,
+                    mailingAddress: mailingAddress,
+                    county: clientInfo.county,
+                    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+                }, signature);
+
+                const path = `${refId}/Signed_Agreement_${timestamp}.pdf`;
+                const { url, error } = await uploadFile('client-documents', path, agreementBlob);
+                if (url) agreementUrl = url;
+                else console.error('Agreement upload failed:', error);
+            }
+
+            // 3. Save/Update Supabase
+            const leadData = {
                 owner_name: `${clientInfo.firstName} ${clientInfo.lastName}`,
                 email: clientInfo.email,
                 phone: clientInfo.phone,
@@ -66,17 +152,23 @@ export const OnboardingPortal = () => {
                 case_type: clientInfo.caseType,
                 mailing_address: mailingAddress,
                 notes: clientInfo.notes,
-                source: 'portal',
-                documents: docNames,
+                source: existingLeadId ? undefined : 'portal',
+                documents: uploadedUrls, // Store actual URLs now
                 signature_data: signature || undefined,
+                agreement_link: agreementUrl || undefined, // Store the signed PDF URL here
                 reference_id: refId,
-            });
+                status: 'signed', // Direct to signed status
+            };
 
-            if (!success) {
-                console.error('❌ Lead insert failed:', dbError);
-                setSubmitError(`Failed to save your submission: ${dbError || 'Unknown error'}. Please try again or call us at (407) 917-8640.`);
+            const result = existingLeadId
+                ? await updateLead(existingLeadId, leadData)
+                : await insertLead(leadData);
+
+            if (!result.success) {
+                console.error('❌ Lead op failed:', result.error);
+                setSubmitError(`Failed to save your submission: ${result.error || 'Unknown error'}. Please try again or call us at (407) 917-8640.`);
                 setIsSubmitting(false);
-                return; // Stop — do NOT show success page
+                return;
             }
 
             // 2. Send admin notification email (template_fzhb2n2)
@@ -101,17 +193,8 @@ export const OnboardingPortal = () => {
                 return;
             }
 
-            // 3. Send claimant welcome email (template_f69k4vn)
-            console.log('📧 Sending claimant welcome email...');
-            const welcomeEmailSent = await sendClaimantWelcomeEmail({
-                name: `${clientInfo.firstName} ${clientInfo.lastName}`,
-                email: clientInfo.email,
-                referenceId: refId,
-            });
-
-            if (!welcomeEmailSent) {
-                console.warn('⚠️ Claimant welcome email failed, but lead and admin notification succeeded.');
-            }
+            // 3. Send Auto-Reply to User via EmailJS
+            await sendAutoReply(clientInfo.email, clientInfo.firstName);
 
             console.log('✅ Submission complete — ref:', refId);
             setIsSubmitting(false);
@@ -135,9 +218,12 @@ export const OnboardingPortal = () => {
                     <ArrowLeft className="w-4 h-4" />
                     <span className="hidden sm:inline">Back to Citus</span>
                 </Link>
-                <span className="text-2xl font-serif font-semibold italic tracking-tighter text-slate-900">
-                    Citus
-                </span>
+                <div className="flex items-center gap-2">
+                    {isLoading && <Loader2 className="w-4 h-4 text-emerald-500 animate-spin" />}
+                    <span className="text-2xl font-serif font-semibold italic tracking-tighter text-slate-900">
+                        Citus
+                    </span>
+                </div>
                 <a
                     href={`tel:${COMPANY.phoneTel}`}
                     className="text-sm text-slate-400 hover:text-slate-700 transition-colors font-medium"

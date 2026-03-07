@@ -67,7 +67,7 @@ function buildEmailHTML(lead: {
     const siteUrl = process.env.SITE_URL;
     const trackLink = `${siteUrl}/api/track-click?lead_id=${lead.id}&redirect=${encodeURIComponent(siteUrl + "/portal")}`;
     const fullName = lead.owner_name || "Property Owner";
-    const firstName = fullName.split(" ")[0];
+    const firstName = getFirstName(fullName);
     const today = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
     return `
@@ -155,9 +155,23 @@ function buildEmailHTML(lead: {
 </html>`;
 }
 
+function getFirstName(fullName: string | null): string {
+    if (!fullName) return "Property Owner";
+
+    // Clean up common prefixes for Estates, Trusts, and LLCs
+    let name = fullName.replace(/^(the\s+)?(estate\s+of|trust\s+of|trustee\s+for|succession\s+of)\s+/i, "").trim();
+
+    // If it's an LLC or Corp, use the whole name or "Property Owner" if too long
+    if (name.toUpperCase().includes(" LLC") || name.toUpperCase().includes(" CORP") || name.toUpperCase().includes(" INC")) {
+        return name.length < 25 ? name : "Property Owner";
+    }
+
+    return name.split(" ")[0] || "Property Owner";
+}
+
 // ── Email subject line ───────────────────────────────────
 function buildSubject(lead: { owner_name: string; county: string | null; case_number: string | null }): string {
-    const firstName = (lead.owner_name || "Property Owner").split(" ")[0];
+    const firstName = getFirstName(lead.owner_name);
     if (lead.county) {
         return `${firstName}, unclaimed funds from your ${lead.county} County property`;
     }
@@ -227,9 +241,12 @@ const handler: Handler = async (event: HandlerEvent) => {
         const transporter = getTransporter();
         const htmlBody = buildEmailHTML(lead);
 
+        // Handle multiple emails (comma-separated)
+        const recipients = lead.email.split(',').map((e: string) => e.trim()).filter(Boolean);
+
         await transporter.sendMail({
             from: `"Citus Recovery Solutions" <${process.env.GMAIL_USER}>`,
-            to: lead.email,
+            to: recipients,
             subject: buildSubject(lead),
             html: htmlBody,
         });

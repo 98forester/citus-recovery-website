@@ -50,7 +50,30 @@ export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseAnonKe
 // CREATE POLICY "Allow anonymous inserts" ON leads
 //   FOR INSERT TO anon
 //   WITH CHECK (true);
+//
+// -- Storage Setup (Dashboard → Storage):
+// -- Create a public bucket named 'client-documents'
+// -- Policy: Allow public upload (INSERT) to 'client-documents'
 // ──────────────────────────────────────────────
+
+export const uploadFile = async (bucket: string, path: string, file: File | Blob): Promise<{ url: string | null; error?: string }> => {
+    try {
+        const { data, error } = await supabase.storage.from(bucket).upload(path, file, {
+            cacheControl: '3600',
+            upsert: true
+        });
+
+        if (error) {
+            console.error('❌ Supabase storage upload failed:', error.message);
+            return { url: null, error: error.message };
+        }
+
+        const { data: { publicUrl } } = supabase.storage.from(bucket).getPublicUrl(data.path);
+        return { url: publicUrl };
+    } catch (err) {
+        return { url: null, error: String(err) };
+    }
+};
 
 export interface LeadInsert {
     owner_name: string;
@@ -72,21 +95,45 @@ export interface LeadInsert {
     lpoa_link?: string;
 }
 
-export const insertLead = async (lead: LeadInsert): Promise<{ success: boolean; error?: string }> => {
-
+export const insertLead = async (lead: LeadInsert): Promise<{ success: boolean; id?: string; error?: string }> => {
     try {
-        const { error } = await supabase.from('leads').insert([lead]);
-
+        const { data, error } = await supabase.from('leads').insert([lead]).select();
         if (error) {
             console.error('❌ Supabase insert failed:', error.message);
             return { success: false, error: error.message };
         }
+        return { success: true, id: data?.[0]?.id };
+    } catch (err) {
+        return { success: false, error: String(err) };
+    }
+};
 
-        console.log('✅ Lead saved to Supabase:', lead.owner_name);
+export const getLead = async (idOrRef: string): Promise<{ data: any | null; error?: string }> => {
+    try {
+        // Try UUID first, then reference_id
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrRef);
+
+        let query = supabase.from('leads').select('*');
+        if (isUuid) {
+            query = query.eq('id', idOrRef);
+        } else {
+            query = query.eq('reference_id', idOrRef);
+        }
+
+        const { data, error } = await query.single();
+        if (error) return { data: null, error: error.message };
+        return { data };
+    } catch (err) {
+        return { data: null, error: String(err) };
+    }
+};
+
+export const updateLead = async (id: string, updates: Partial<LeadInsert>): Promise<{ success: boolean; error?: string }> => {
+    try {
+        const { error } = await supabase.from('leads').update(updates).eq('id', id);
+        if (error) return { success: false, error: error.message };
         return { success: true };
     } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unknown network error';
-        console.error('❌ Supabase request failed:', msg);
-        return { success: false, error: msg };
+        return { success: false, error: String(err) };
     }
 };

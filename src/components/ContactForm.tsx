@@ -25,9 +25,10 @@ export const ContactForm = () => {
         const notes = formData.get('notes') as string;
 
         const ownerName = `${firstName} ${lastName}`.trim();
+        const referenceId = `CITUS-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
 
         // Save to Supabase
-        const { success, error: dbError } = await insertLead({
+        const { success, id: leadId, error: dbError } = await insertLead({
             owner_name: ownerName,
             email,
             phone,
@@ -35,14 +36,17 @@ export const ContactForm = () => {
             case_type: situation,
             notes,
             source: 'contact_form',
+            reference_id: referenceId
         });
 
-        if (!success) {
+        if (!success || !leadId) {
             console.error('Supabase error:', dbError);
-            // Still try to send email even if DB fails
+            setError("We encountered an issue saving your request. Please try again.");
+            setSubmitting(false);
+            return;
         }
 
-        // Send email notification
+        // Send emails (Admin notification + User Auto-Reply) via EmailJS
         await sendContactEmail({
             name: ownerName,
             email,
@@ -127,8 +131,8 @@ export const ContactForm = () => {
                             type="submit"
                             disabled={submitting}
                             className={`w-full py-4 rounded-full font-bold text-sm uppercase tracking-widest transition-all focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 ${submitting
-                                    ? 'bg-slate-400 text-white cursor-wait'
-                                    : 'bg-slate-900 text-white hover:bg-slate-700'
+                                ? 'bg-slate-400 text-white cursor-wait'
+                                : 'bg-slate-900 text-white hover:bg-slate-700'
                                 }`}
                         >
                             {submitting ? 'Submitting...' : 'Check My Funds — Free'}

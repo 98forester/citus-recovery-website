@@ -6,22 +6,7 @@ import { supabase } from '../../utils/supabaseClient';
 // Shows all HOT_LEAD status leads with call/text tracking
 // ════════════════════════════════════════════════════════════════
 
-interface Lead {
-    id: string;
-    owner_name: string;
-    email: string | null;
-    phone: string | null;
-    county: string | null;
-    surplus_amount: string | null;
-    case_number: string | null;
-    property_address: string | null;
-    status: string;
-    created_at: string;
-    outreach_sent_at: string | null;
-    contacted_at: string | null;
-    contact_method: string | null;
-    contact_notes: string | null;
-}
+import { Lead } from '../../types';
 
 interface CallListProps {
     leads: Lead[];
@@ -131,8 +116,8 @@ export function CallList({ leads, onRefresh }: CallListProps) {
                     <div
                         key={lead.id}
                         className={`rounded-xl border p-5 transition-all ${isContacted
-                                ? 'bg-white/[0.02] border-white/5 opacity-60'
-                                : 'bg-gradient-to-r from-red-500/[0.06] to-transparent border-red-500/20 shadow-lg shadow-red-500/5'
+                            ? 'bg-white/[0.02] border-white/5 opacity-60'
+                            : 'bg-gradient-to-r from-red-500/[0.06] to-transparent border-red-500/20 shadow-lg shadow-red-500/5'
                             }`}
                     >
                         <div className="flex items-start justify-between gap-4">

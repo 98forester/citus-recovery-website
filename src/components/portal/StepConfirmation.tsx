@@ -70,22 +70,22 @@ export const StepConfirmation = ({
                 <span className="text-xl font-mono font-bold text-slate-800 tracking-wider">{referenceId}</span>
             </div>
 
-            {/* Download Signed Agreement */}
+            {/* Download Signed Agreement & Resources */}
             <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="mb-10"
+                className="mb-10 grid sm:grid-cols-2 gap-4"
             >
                 <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-6">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-3">Your Signed Agreement</p>
-                    <p className="text-sm text-slate-600 mb-4">
-                        Download a copy of the Services Agreement you just signed for your records.
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-600 mb-3">Your Signed Copy (PDF)</p>
+                    <p className="text-xs text-slate-600 mb-4">
+                        Download the official PDF version of the Services Agreement you just signed.
                     </p>
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className={`inline-flex items-center justify-center gap-2 px-8 py-3 rounded-full text-sm font-bold uppercase tracking-widest transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${downloaded
+                        className={`inline-flex items-center justify-center gap-2 w-full py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 ${downloaded
                             ? 'bg-emerald-100 text-emerald-700 border-2 border-emerald-200'
                             : 'bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-600 shadow-lg shadow-emerald-600/25'
                             }`}
@@ -93,20 +93,47 @@ export const StepConfirmation = ({
                         {isGenerating ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Generating...
+                                Generating PDF...
                             </>
                         ) : downloaded ? (
                             <>
                                 <CheckCircle className="w-4 h-4" />
-                                Downloaded
+                                PDF Downloaded
                             </>
                         ) : (
                             <>
                                 <Download className="w-4 h-4" />
-                                Download Signed Agreement
+                                Download Signed PDF
                             </>
                         )}
                     </button>
+                </div>
+
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Common Forms</p>
+                    <p className="text-xs text-slate-600 mb-4">
+                        View or download blank copies of our standard recovery documents.
+                    </p>
+                    <div className="flex flex-col gap-2">
+                        <a
+                            href={COMPANY.links.serviceAgreement}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-700 transition-all shadow-sm"
+                        >
+                            <span>SIGN SERVICE AGREEMENT</span>
+                            <FileText className="w-3 h-3" />
+                        </a>
+                        <a
+                            href={COMPANY.links.lpoa}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between px-4 py-2 bg-white border-2 border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:border-emerald-300 hover:text-emerald-600 transition-all"
+                        >
+                            <span>SIGN LIMITED POA</span>
+                            <FileText className="w-3 h-3" />
+                        </a>
+                    </div>
                 </div>
             </motion.div>
 
