@@ -52,6 +52,7 @@ export const StepReviewSign = ({
         clientName: `${clientInfo.firstName} ${clientInfo.lastName}`,
         propertyAddress: clientInfo.propertyAddress,
         county: clientInfo.county,
+        mailingAddress: `${clientInfo.streetAddress}${clientInfo.city ? `, ${clientInfo.city}` : ''}${clientInfo.state ? `, ${clientInfo.state}` : ''}${clientInfo.zip ? ` ${clientInfo.zip}` : ''}`,
         date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     });
 

@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /portal
 
-Sitemap: https://citusrecoverysolutions.com/sitemap.xml
+Sitemap: https://www.citusrecoverysolutions.com/sitemap.xml

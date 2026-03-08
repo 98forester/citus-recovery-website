@@ -319,6 +319,7 @@ export const OnboardingPortal = () => {
                             propertyAddress={clientInfo.propertyAddress}
                             county={clientInfo.county}
                             signatureDataUrl={signature}
+                            mailingAddress={`${clientInfo.streetAddress}${clientInfo.city ? `, ${clientInfo.city}` : ''}${clientInfo.state ? `, ${clientInfo.state}` : ''}${clientInfo.zip ? ` ${clientInfo.zip}` : ''}`}
                         />
                     )}
                 </AnimatePresence>

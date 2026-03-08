@@ -12,6 +12,7 @@ interface StepConfirmationProps {
     propertyAddress: string;
     county: string;
     signatureDataUrl: string | null;
+    mailingAddress: string;
 }
 
 export const StepConfirmation = ({
@@ -22,6 +23,7 @@ export const StepConfirmation = ({
     propertyAddress,
     county,
     signatureDataUrl,
+    mailingAddress,
 }: StepConfirmationProps) => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [downloaded, setDownloaded] = useState(false);
@@ -33,6 +35,7 @@ export const StepConfirmation = ({
                 {
                     clientName: `${clientFirstName} ${clientLastName}`,
                     propertyAddress,
+                    mailingAddress,
                     county,
                     date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
                 },
@@ -112,7 +115,7 @@ export const StepConfirmation = ({
                 <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6">
                     <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Common Forms</p>
                     <p className="text-xs text-slate-600 mb-4">
-                        View or download blank copies of our standard recovery documents.
+                        View or download our standard Service Agreement document.
                     </p>
                     <div className="flex flex-col gap-2">
                         <a
@@ -122,15 +125,6 @@ export const StepConfirmation = ({
                             className="flex items-center justify-between px-4 py-2 bg-emerald-600 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-700 transition-all shadow-sm"
                         >
                             <span>SIGN SERVICE AGREEMENT</span>
-                            <FileText className="w-3 h-3" />
-                        </a>
-                        <a
-                            href={COMPANY.links.lpoa}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between px-4 py-2 bg-white border-2 border-slate-200 rounded-lg text-[10px] font-bold text-slate-600 hover:border-emerald-300 hover:text-emerald-600 transition-all"
-                        >
-                            <span>SIGN LIMITED POA</span>
                             <FileText className="w-3 h-3" />
                         </a>
                     </div>
